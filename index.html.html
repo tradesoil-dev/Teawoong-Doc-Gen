@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Taewoong Bio — Document Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --teal:#1A6B6B;--teal-light:#E8F5F5;--teal-mid:#B2D8D8;--teal-dark:#0F4A4A;
+  --dark:#111827;--gray:#6B7280;--gray-light:#F9FAFB;--gray-border:#E5E7EB;
+  --white:#ffffff;--red:#EF4444;--green:#16A34A;--green-light:#DCFCE7;--red-light:#FEE2E2;
+  --radius:10px;--radius-sm:6px;
+  --shadow:0 1px 3px rgba(0,0,0,0.08),0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md:0 4px 16px rgba(0,0,0,0.08),0 2px 4px rgba(0,0,0,0.04);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:#F3F4F6;color:var(--dark);min-height:100vh;font-size:14px;line-height:1.6}
+
+/* ── TOP BAR ── */
+.topbar{background:var(--teal);color:#fff;padding:0 24px;display:flex;align-items:center;gap:16px;height:60px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(26,107,107,0.3)}
+.topbar-logo{width:34px;height:34px;background:rgba(255,255,255,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:12px;letter-spacing:0.5px;flex-shrink:0}
+.topbar-title{font-weight:600;font-size:15px;letter-spacing:-0.2px}
+.topbar-sub{font-size:12px;opacity:0.75;margin-left:4px}
+.topbar-tabs{margin-left:auto;display:flex;gap:4px}
+.topbar-tab{padding:6px 16px;border-radius:6px;border:1px solid rgba(255,255,255,0.25);font-size:13px;cursor:pointer;background:transparent;color:rgba(255,255,255,0.8);font-family:'DM Sans',sans-serif;transition:all 0.15s;font-weight:500}
+.topbar-tab:hover{background:rgba(255,255,255,0.1);color:#fff}
+.topbar-tab.active{background:#fff;color:var(--teal);border-color:#fff;font-weight:600}
+
+/* ── LAYOUT ── */
+.main{max-width:960px;margin:0 auto;padding:24px 16px 48px}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+.card{background:var(--white);border-radius:var(--radius);border:1px solid var(--gray-border);box-shadow:var(--shadow);margin-bottom:16px;overflow:hidden}
+.card-header{padding:12px 20px;border-bottom:1px solid var(--gray-border);display:flex;align-items:center;gap:10px;background:#FAFAFA}
+.card-header svg{color:var(--teal);flex-shrink:0}
+.card-header h3{font-size:12px;font-weight:600;color:var(--dark);text-transform:uppercase;letter-spacing:0.5px}
+.card-body{padding:18px 20px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-grid.three{grid-template-columns:1fr 1fr 1fr}
+.fg-full{grid-column:1/-1}
+.form-group{display:flex;flex-direction:column;gap:4px}
+.form-group label{font-size:11px;font-weight:600;color:var(--gray);text-transform:uppercase;letter-spacing:0.4px}
+.form-group input,.form-group select,.form-group textarea{font-family:'DM Sans',sans-serif;font-size:13px;padding:7px 11px;border-radius:var(--radius-sm);border:1px solid var(--gray-border);color:var(--dark);background:#fff;width:100%;transition:border-color 0.15s,box-shadow 0.15s;outline:none}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(26,107,107,0.1)}
+.form-group textarea{resize:vertical;min-height:68px;line-height:1.5}
+.logo-upload-btn{font-family:'DM Sans',sans-serif;font-size:13px;padding:7px 11px;border-radius:var(--radius-sm);border:1.5px dashed var(--teal-mid);color:var(--teal);background:var(--teal-light);width:100%;cursor:pointer;text-align:left;transition:all 0.15s}
+.logo-upload-btn:hover{background:#d4ecec;border-color:var(--teal)}
+.logo-preview{max-height:50px;max-width:180px;object-fit:contain;border-radius:4px;border:1px solid var(--gray-border);padding:4px;background:#fff;margin-top:6px}
+
+/* ── SPEC TABLE ── */
+.spec-wrap{overflow-x:auto}
+.spec-table{width:100%;border-collapse:collapse;font-size:13px;min-width:520px}
+.spec-table thead tr{background:var(--teal)}
+.spec-table th{padding:8px 10px;text-align:left;font-size:11px;font-weight:600;color:#fff;text-transform:uppercase;letter-spacing:0.4px;white-space:nowrap}
+.spec-table tbody tr:nth-child(even){background:#FAFAFA}
+.spec-table tbody tr:hover{background:#F0FAFA}
+.spec-table td{padding:4px 5px;border-bottom:1px solid #F0F0F0;vertical-align:middle}
+.spec-table td input{font-family:'DM Mono',monospace;font-size:12px;padding:5px 8px;border:1px solid var(--gray-border);border-radius:5px;background:#fff;color:var(--dark);width:100%;outline:none;transition:border-color 0.15s}
+.spec-table td input:focus{border-color:var(--teal);box-shadow:0 0 0 2px rgba(26,107,107,0.1)}
+.spec-table td input.result-inp{border-color:var(--teal-mid)}
+.del-btn{background:none;border:none;cursor:pointer;color:#CBD5E1;padding:3px 7px;border-radius:5px;font-size:15px;transition:all 0.15s;line-height:1}
+.del-btn:hover{color:var(--red);background:var(--red-light)}
+.add-row-btn{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:500;color:var(--teal);cursor:pointer;padding:8px 14px;border:1.5px dashed var(--teal-mid);border-radius:var(--radius-sm);background:none;margin-top:10px;font-family:'DM Sans',sans-serif;transition:all 0.15s;width:100%;justify-content:center}
+.add-row-btn:hover{background:var(--teal-light);border-color:var(--teal)}
+
+/* ── ACTIONS ── */
+.actions{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;align-items:center}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:9px 20px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;border:none}
+.btn-primary{background:var(--teal);color:#fff;box-shadow:0 2px 6px rgba(26,107,107,0.3)}
+.btn-primary:hover{background:var(--teal-dark)}
+.btn-secondary{background:#fff;color:var(--dark);border:1px solid var(--gray-border);box-shadow:var(--shadow)}
+.btn-secondary:hover{background:var(--gray-light)}
+
+/* ── PREVIEW SHELL ── */
+.preview-shell{background:#D1D5DB;border-radius:var(--radius);padding:20px;margin-top:20px}
+.preview-label{font-size:11px;font-weight:600;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px}
+
+/* ══════════════════════════════════════════
+   DOCUMENT STYLES  — A4, print-safe
+══════════════════════════════════════════ */
+.doc{
+  background:#fff;
+  width:210mm;
+  min-height:297mm;
+  margin:0 auto;
+  box-shadow:0 4px 24px rgba(0,0,0,0.12);
+  font-family:'DM Sans',sans-serif;
+  color:#111827;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+
+/* Company header — inspired by huijin pattern */
+.doc-company-header{
+  padding:20px 28px 16px;
+  border-bottom:3px solid var(--teal);
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:16px;
+}
+.dch-left{display:flex;align-items:flex-start;gap:14px}
+.dch-logo{height:52px;width:auto;object-fit:contain;flex-shrink:0}
+.dch-logo-placeholder{height:52px;width:52px;background:var(--teal);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px;flex-shrink:0}
+.dch-company-name{font-size:14px;font-weight:700;color:var(--dark);letter-spacing:-0.2px;line-height:1.2;margin-bottom:4px}
+.dch-company-addr{font-size:9px;color:var(--gray);line-height:1.6;max-width:280px}
+.dch-right{text-align:right;flex-shrink:0}
+.dch-doc-type{font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--teal);margin-bottom:4px}
+.dch-doc-meta{font-size:9.5px;color:var(--gray);line-height:1.7}
+
+/* Document title band */
+.doc-title-band{background:var(--teal);color:#fff;padding:10px 28px;display:flex;justify-content:space-between;align-items:center}
+.doc-title-band h2{font-size:15px;font-weight:700;letter-spacing:-0.2px}
+.doc-title-band p{font-size:10px;opacity:0.85}
+
+/* Body */
+.doc-body{padding:16px 28px;flex:1}
+
+/* Brief */
+.doc-brief{background:var(--teal-light);border-left:4px solid var(--teal);padding:9px 14px;font-size:10.5px;color:var(--dark);font-style:italic;margin-bottom:14px;line-height:1.6}
+
+/* Section heading */
+.doc-sec{font-size:9px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:0.7px;margin:12px 0 5px;padding-bottom:3px;border-bottom:1.5px solid var(--teal-mid)}
+
+/* Spec / result table */
+.dtable{width:100%;border-collapse:collapse;font-size:10px}
+.dtable th{background:var(--teal);color:#fff;padding:6px 9px;text-align:left;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0.3px}
+.dtable td{padding:5px 9px;border-bottom:1px solid #F0F0F0;color:var(--dark);text-align:left}
+.dtable td.param{font-weight:500}
+.dtable td.unit{color:var(--gray);font-family:'DM Mono',monospace;font-size:9.5px}
+.dtable td.method{color:var(--gray);font-size:9.5px}
+.dtable td.spec-val{font-weight:600;color:var(--teal);font-family:'DM Mono',monospace;font-size:9.5px}
+.dtable td.result-val{font-weight:600;font-family:'DM Mono',monospace;font-size:9.5px}
+.dtable tbody tr:nth-child(even) td{background:#F9FFFE}
+.pass-v{color:var(--green)}
+.fail-v{color:var(--red)}
+
+/* Info grid */
+.info-grid{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--gray-border);border-radius:5px;overflow:hidden;margin-top:4px}
+.info-block{display:flex;border-bottom:1px solid var(--gray-border)}
+.info-block:nth-child(odd){border-right:1px solid var(--gray-border)}
+.info-block:nth-last-child(-n+2){border-bottom:none}
+.info-label{
+  background:var(--teal);color:#fff;
+  font-size:8px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;
+  padding:8px 10px;
+  width:90px;min-width:90px;
+  display:flex;align-items:center;justify-content:center;
+  text-align:center;line-height:1.3;
+  flex-shrink:0;
+}
+.info-content{background:var(--teal-light);padding:7px 11px;font-size:9.5px;color:var(--dark);flex:1;line-height:1.7}
+
+/* CoA meta boxes */
+.coa-meta{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:14px}
+.meta-box{background:var(--teal-light);border-radius:5px;padding:7px 10px}
+.meta-box .ml{font-size:8px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:2px}
+.meta-box .mv{font-size:11px;font-weight:600;color:var(--dark);font-family:'DM Mono',monospace}
+
+/* Overall badge */
+.overall-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:9px;font-weight:700;letter-spacing:0.3px}
+.badge-pass{background:var(--green-light);color:var(--green)}
+.badge-fail{background:var(--red-light);color:var(--red)}
+
+/* Remarks */
+.doc-remarks{font-size:10px;color:#374151;line-height:1.6;padding:8px 12px;background:#F9FAFB;border-radius:5px;border:1px solid var(--gray-border)}
+
+/* Signature section */
+.sig-section{margin-top:28px;padding-top:16px;border-top:1px solid var(--gray-border);display:grid;grid-template-columns:1fr 1fr;gap:40px}
+.sig-box{display:flex;flex-direction:column;gap:4px}
+.sig-box .sig-line-draw{border-bottom:1px solid #9CA3AF;height:36px;margin-bottom:4px}
+.sig-box .sig-label{font-size:9px;color:var(--gray);font-weight:600;text-transform:uppercase;letter-spacing:0.4px}
+
+/* Document footer */
+.doc-foot{margin-top:auto;background:#F9FAFB;padding:7px 28px;font-size:8.5px;color:var(--gray);font-style:italic;border-top:1px solid var(--gray-border)}
+
+/* ── PRINT ── */
+@media print{
+  body{background:#fff!important;margin:0!important;padding:0!important}
+  .topbar,.card,.actions,.preview-label,.add-row-btn,.del-btn,.btn{display:none!important}
+  .preview-shell{padding:0!important;background:none!important;margin:0!important}
+  #print-target{display:block!important}
+  .doc{width:100%!important;min-height:0!important;box-shadow:none!important;margin:0!important}
+  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+}
+@page{size:A4;margin:10mm}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-logo">TB</div>
+  <div>
+    <span class="topbar-title">Taewoong Bio Co., Ltd.</span>
+    <span class="topbar-sub">Document Generator</span>
+  </div>
+  <div class="topbar-tabs">
+    <button class="topbar-tab active" onclick="switchTab('tds')">📄 TDS Builder</button>
+    <button class="topbar-tab" onclick="switchTab('coa')">🔬 CoA Builder</button>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- ══ TDS PANEL ══ -->
+  <div id="panel-tds" class="tab-panel active">
+
+    <!-- Company Info -->
+    <div class="card">
+      <div class="card-header">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-2 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+        <h3>Company Information</h3>
+      </div>
+      <div class="card-body">
+        <div class="form-grid">
+          <div class="form-group"><label>Company Name</label><input id="t-co-name" value="Taewoong Bio Co., Ltd."></div>
+          <div class="form-group"><label>Website</label><input id="t-co-web" value="www.taewoongbio.com" placeholder="www.example.com"></div>
+          <div class="form-group fg-full"><label>Address</label><input id="t-co-addr" value="123 Eco Industrial Complex, Incheon, South Korea" placeholder="Full company address"></div>
+          <div class="form-group"><label>Tel</label><input id="t-co-tel" value="+82-32-000-0000" placeholder="+82-..."></div>
+          <div class="form-group"><label>Email</label><input id="t-co-email" value="info@taewoongbio.com" placeholder="info@..."></div>
+          <div class="form-group fg-full">
+            <label>Company Logo (optional)</label>
+            <button class="logo-upload-btn" onclick="document.getElementById('t-logo-input').click()">📁 Upload logo image (PNG or JPG)</button>
+            <input type="file" id="t-logo-input" accept="image/*" style="display:none" onchange="handleLogo('t','t-logo-preview')">
+            <img id="t-logo-preview" class="logo-preview" style="display:none">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Product Info -->
+    <div class="card">
+      <div class="card-header">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        <h3>Product Information</h3>
+      </div>
+      <div class="card-body">
+        <div class="form-grid">
+          <div class="form-group"><label>Product Name</label><input id="t-name" value="Mixed Fatty Acid (MFA)"></div>
+          <div class="form-group"><label>Product Code</label><input id="t-code" value="TW-MFA-01"></div>
+          <div class="form-group"><label>Grade / Type</label><input id="t-grade" value="Industrial / Biofuel Grade"></div>
+          <div class="form-group"><label>Document Version</label><input id="t-ver" value="v1.0"></div>
+          <div class="form-group fg-full"><label>Product Brief</label><textarea id="t-brief">Mixed Fatty Acid (MFA) is a bio-based fatty acid blend derived from vegetable oil processing streams, suitable as a renewable feedstock for HVO, FAME biodiesel, SAF co-processing, and oleochemical manufacturing. Offered as a direct, sustainable replacement for Palm Fatty Acid Distillate (PFAD).</textarea></div>
+          <div class="form-group fg-full"><label>Applications</label><input id="t-apps" value="HVO feedstock, FAME biodiesel, SAF co-processing, oleochemicals, soap & surfactants"></div>
+          <div class="form-group"><label>Origin</label><input id="t-origin" value="South Korea"></div>
+          <div class="form-group"><label>Certification</label><input id="t-cert" value="ISCC EU / ISCC PLUS available on request"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Spec Parameters -->
+    <div class="card">
+      <div class="card-header">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 10h18M3 14h18M10 3v18M14 3v18" stroke-linecap="round"/></svg>
+        <h3>Specification Parameters</h3>
+      </div>
+      <div class="card-body">
+        <div class="spec-wrap">
+          <table class="spec-table">
+            <thead><tr><th style="width:28%">Parameter</th><th style="width:11%">Unit</th><th style="width:33%">Test Method</th><th style="width:20%">Specification</th><th style="width:8%"></th></tr></thead>
+            <tbody id="tds-tbody"></tbody>
+          </table>
+        </div>
+        <button class="add-row-btn" onclick="addRow('tds')">＋ Add parameter</button>
+      </div>
+    </div>
+
+    <!-- Storage -->
+    <div class="card">
+      <div class="card-header">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+        <h3>Storage, Packaging & Logistics</h3>
+      </div>
+      <div class="card-body">
+        <div class="form-grid three">
+          <div class="form-group"><label>Storage Conditions</label><input id="t-storage" value="Carbon steel / SS tank; N₂ blanket; max 80°C"></div>
+          <div class="form-group"><label>Shelf Life</label><input id="t-shelf" value="12 months"></div>
+          <div class="form-group"><label>Packaging</label><input id="t-pkg" value="Flexitank 24 MT, ISO tank, bulk tanker"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-primary" onclick="previewTDS()">👁 Preview TDS</button>
+      <button class="btn btn-secondary" onclick="window.print()">🖨 Print / Save PDF</button>
+      <button class="btn btn-secondary" onclick="document.getElementById('tds-preview-area').innerHTML=''">✕ Clear</button>
+    </div>
+    <div id="tds-preview-area"></div>
+  </div>
+
+  <!-- ══ CoA PANEL ══ -->
+  <div id="panel-coa" class="tab-panel">
+
+    <!-- Company Info -->
+    <div class="card">
+      <div class="card-header">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-2 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+        <h3>Company Information</h3>
+      </div>
+      <div class="card-body">
+        <div class="form-grid">
+          <div class="form-group"><label>Company Name</label><input id="c-co-name" value="Taewoong Bio Co., Ltd."></div>
+          <div class="form-group"><label>Website</label><input id="c-co-web" value="www.taewoongbio.com"></div>
+          <div class="form-group fg-full"><label>Address</label><input id="c-co-addr" value="123 Eco Industrial Complex, Incheon, South Korea"></div>
+          <div class="form-group"><label>Tel</label><input id="c-co-tel" value="+82-32-000-0000"></div>
+          <div class="form-group"><label>Email</label><input id="c-co-email" value="info@taewoongbio.com"></div>
+          <div class="form-group fg-full">
+            <label>Company Logo (optional)</label>
+            <button class="logo-upload-btn" onclick="document.getElementById('c-logo-input').click()">📁 Upload logo image (PNG or JPG)</button>
+            <input type="file" id="c-logo-input" accept="image/*" style="display:none" onchange="handleLogo('c','c-logo-preview')">
+            <img id="c-logo-preview" class="logo-preview" style="display:none">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Batch Details -->
+    <div class="card">
+      <div class="card-header">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        <h3>Product & Batch Details</h3>
+      </div>
+      <div class="card-body">
+        <div class="form-grid three">
+          <div class="form-group"><label>Product Name</label><input id="c-name" value="Mixed Fatty Acid (MFA)"></div>
+          <div class="form-group"><label>Product Code</label><input id="c-code" value="TW-MFA-01"></div>
+          <div class="form-group"><label>Batch / Lot No.</label><input id="c-batch" value="TW-2026-001"></div>
+          <div class="form-group"><label>Production Date</label><input id="c-prod" type="date"></div>
+          <div class="form-group"><label>Best Before / Expiry</label><input id="c-exp" type="date"></div>
+          <div class="form-group"><label>Quantity (MT)</label><input id="c-qty" value="24.0"></div>
+          <div class="form-group"><label>Testing Laboratory</label><input id="c-lab" value="SGS Korea Ltd."></div>
+          <div class="form-group"><label>Sample Date</label><input id="c-sdate" type="date"></div>
+          <div class="form-group"><label>Customer / Consignee</label><input id="c-cust" placeholder="Customer company name"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Test Results -->
+    <div class="card">
+      <div class="card-header">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
+        <h3>Test Results</h3>
+      </div>
+      <div class="card-body">
+        <div class="spec-wrap">
+          <table class="spec-table">
+            <thead><tr><th style="width:25%">Parameter</th><th style="width:10%">Unit</th><th style="width:22%">Method</th><th style="width:18%">Specification</th><th style="width:17%">Result</th><th style="width:8%"></th></tr></thead>
+            <tbody id="coa-tbody"></tbody>
+          </table>
+        </div>
+        <button class="add-row-btn" onclick="addRow('coa')">＋ Add parameter</button>
+      </div>
+    </div>
+
+    <!-- Remarks -->
+    <div class="card">
+      <div class="card-header">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/></svg>
+        <h3>Remarks</h3>
+      </div>
+      <div class="card-body">
+        <div class="form-group"><textarea id="c-remarks" style="min-height:52px">All test results comply with the agreed specification. Retained sample held for 12 months from date of analysis.</textarea></div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-primary" onclick="previewCoA()">👁 Preview CoA</button>
+      <button class="btn btn-secondary" onclick="window.print()">🖨 Print / Save PDF</button>
+      <button class="btn btn-secondary" onclick="document.getElementById('coa-preview-area').innerHTML=''">✕ Clear</button>
+    </div>
+    <div id="coa-preview-area"></div>
+  </div>
+
+</div><!-- /main -->
+
+<script>
+const TDS_DEF=[
+  ["Total Acid Number","mg KOH/g","ASTM D664","Report"],
+  ["Moisture","wt%","Karl Fischer (coulometric)","Max. 2.0"],
+  ["Free Fatty Acids","wt%","AOCS Ca 5a-40","0 – 100"],
+  ["Unsaponifiable Matter","wt%","AOCS Ca 6a-40 / Ca 6b-53","Max. 5.0"],
+  ["Iodine Value","–","AOCS Cd 1d-92","Report"],
+  ["Saponification Value","mg KOH/g","AOCS Cd 3-25","Report"],
+  ["Oxidation Stability","hours","EN 14112 (Rancimat)","Report"],
+  ["Phosphorus","wppm","ASTM D4951","Max. 50"],
+  ["Sulfur","wppm","ASTM D5453","Max. 50"],
+  ["Metals (ICP)","wppm","ISO 21033","Report"],
+  ["Nitrogen","wppm","ASTM D4629","Report"],
+  ["Chlorides","wppm","ASTM D7359","Max. 10"],
+  ["Insoluble Impurities","wt%","AOCS Ca 3a-46","Max. 0.2"],
+  ["Mono/Di/Triglycerides","wt%","ASTM D6584","0 – 100"],
+  ["Free/Total Glycerin","wt%","ASTM D6584","Report"],
+];
+const COA_DEF=[
+  ["Total Acid Number","mg KOH/g","ASTM D664","Report",""],
+  ["Moisture","wt%","Karl Fischer","Max. 2.0",""],
+  ["Free Fatty Acids","wt%","AOCS Ca 5a-40","0 – 100",""],
+  ["Unsaponifiable Matter","wt%","AOCS Ca 6a-40/6b-53","Max. 5.0",""],
+  ["Iodine Value","–","AOCS Cd 1d-92","Report",""],
+  ["Saponification Value","mg KOH/g","AOCS Cd 3-25","Report",""],
+  ["Phosphorus","wppm","ASTM D4951","Max. 50",""],
+  ["Sulfur","wppm","ASTM D5453","Max. 50",""],
+  ["Metals (ICP)","wppm","ISO 21033","Report",""],
+  ["Chlorides","wppm","ASTM D7359","Max. 10",""],
+  ["Insoluble Impurities","wt%","AOCS Ca 3a-46","Max. 0.2",""],
+];
+
+// logo storage per tab
+const logos = {t: '', c: ''};
+
+function handleLogo(prefix, previewId) {
+  const input = document.getElementById(prefix+'-logo-input');
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    logos[prefix] = e.target.result;
+    const prev = document.getElementById(previewId);
+    prev.src = e.target.result;
+    prev.style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
+
+function switchTab(t) {
+  document.getElementById('panel-tds').classList.toggle('active', t==='tds');
+  document.getElementById('panel-coa').classList.toggle('active', t==='coa');
+  document.querySelectorAll('.topbar-tab').forEach((el,i)=>el.classList.toggle('active',(i===0&&t==='tds')||(i===1&&t==='coa')));
+}
+
+function addRow(type, d) {
+  const tbody = document.getElementById(type+'-tbody');
+  const tr = document.createElement('tr');
+  const r = d||['','','','',''];
+  if(type==='tds'){
+    tr.innerHTML=`
+      <td><input value="${r[0]}" placeholder="Parameter name"></td>
+      <td><input value="${r[1]}" placeholder="Unit"></td>
+      <td><input value="${r[2]}" placeholder="Test method"></td>
+      <td><input value="${r[3]}" placeholder="Spec / limit"></td>
+      <td><button class="del-btn" onclick="this.closest('tr').remove()">✕</button></td>`;
+  } else {
+    tr.innerHTML=`
+      <td><input value="${r[0]}" placeholder="Parameter name"></td>
+      <td><input value="${r[1]}" placeholder="Unit"></td>
+      <td><input value="${r[2]}" placeholder="Method"></td>
+      <td><input value="${r[3]}" placeholder="Spec / limit"></td>
+      <td><input class="result-inp" value="${r[4]}" placeholder="Actual result"></td>
+      <td><button class="del-btn" onclick="this.closest('tr').remove()">✕</button></td>`;
+  }
+  tbody.appendChild(tr);
+}
+
+function getRows(type) {
+  return Array.from(document.getElementById(type+'-tbody').querySelectorAll('tr')).map(tr=>
+    Array.from(tr.querySelectorAll('input')).map(i=>i.value.trim())
+  );
+}
+
+function fmtDate(v){
+  if(!v) return '—';
+  return new Date(v).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+}
+function today(){return new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});}
+
+function checkPass(spec, result){
+  if(!result||result.toLowerCase()==='report'||result==='') return null;
+  const r=parseFloat(result); if(isNaN(r)) return null;
+  const mx=spec.match(/max\.?\s*([\d.]+)/i);
+  const mn=spec.match(/min\.?\s*([\d.]+)/i);
+  if(mx&&r>parseFloat(mx[1])) return false;
+  if(mn&&r<parseFloat(mn[1])) return false;
+  return true;
+}
+
+function companyHeader(prefix, docType, docMeta){
+  const name = document.getElementById(prefix+'-co-name').value;
+  const addr = document.getElementById(prefix+'-co-addr').value;
+  const tel  = document.getElementById(prefix+'-co-tel').value;
+  const email= document.getElementById(prefix+'-co-email').value;
+  const web  = document.getElementById(prefix+'-co-web').value;
+  const logo = logos[prefix.charAt(0)];
+  const logoHtml = logo
+    ? `<img src="${logo}" class="dch-logo">`
+    : `<div class="dch-logo-placeholder">TB</div>`;
+  return `
+    <div class="doc-company-header">
+      <div class="dch-left">
+        ${logoHtml}
+        <div>
+          <div class="dch-company-name">${name}</div>
+          <div class="dch-company-addr">${addr}<br>${tel} &nbsp;|&nbsp; ${email} &nbsp;|&nbsp; ${web}</div>
+        </div>
+      </div>
+      <div class="dch-right">
+        <div class="dch-doc-type">${docType}</div>
+        <div class="dch-doc-meta">${docMeta}</div>
+      </div>
+    </div>`;
+}
+
+function previewTDS(){
+  const rows = getRows('tds');
+  const v = id => document.getElementById(id).value;
+
+  const specRows = rows.map(r=>`
+    <tr>
+      <td class="param">${r[0]||'—'}</td>
+      <td class="unit">${r[1]||'—'}</td>
+      <td class="method">${r[2]||'—'}</td>
+      <td class="spec-val">${r[3]||'—'}</td>
+    </tr>`).join('');
+
+  const html=`
+    <div class="doc">
+      ${companyHeader('t', 'Product Data Sheet', `Code: ${v('t-code')} &nbsp;|&nbsp; ${v('t-ver')} &nbsp;|&nbsp; ${today()}`)}
+      <div class="doc-title-band">
+        <div>
+          <h2>${v('t-name')}</h2>
+          <p>${v('t-grade')} &nbsp;|&nbsp; Origin: ${v('t-origin')}</p>
+        </div>
+      </div>
+      <div class="doc-body">
+        <div class="doc-brief">${v('t-brief')}</div>
+        <div class="doc-sec">Quality Specifications</div>
+        <table class="dtable">
+          <thead><tr><th style="width:32%">Parameter</th><th style="width:11%">Unit</th><th style="width:35%">Test Method</th><th style="width:22%">Specification</th></tr></thead>
+          <tbody>${specRows}</tbody>
+        </table>
+        <div class="doc-sec" style="margin-top:14px">Product Information</div>
+        <div class="info-grid">
+          <div class="info-block"><div class="info-label">Applications</div><div class="info-content">${v('t-apps')}</div></div>
+          <div class="info-block"><div class="info-label">Certification</div><div class="info-content">${v('t-cert')}</div></div>
+          <div class="info-block"><div class="info-label">Storage</div><div class="info-content">${v('t-storage')}</div></div>
+          <div class="info-block"><div class="info-label">Shelf Life</div><div class="info-content">${v('t-shelf')}</div></div>
+          <div class="info-block"><div class="info-label">Packaging</div><div class="info-content">${v('t-pkg')}</div></div>
+          <div class="info-block"><div class="info-label">Documentation</div><div class="info-content">CoA per batch &nbsp;|&nbsp; SDS on request &nbsp;|&nbsp; ISCC declaration on request</div></div>
+        </div>
+      </div>
+      <div class="doc-foot">&copy; ${v('t-co-name')} &nbsp;|&nbsp; Origin: ${v('t-origin')} &nbsp;|&nbsp; Confidential — intended for named recipient only. Specifications subject to change without notice.</div>
+    </div>`;
+
+  const area = document.getElementById('tds-preview-area');
+  area.innerHTML=`<div class="preview-shell"><div class="preview-label">📄 TDS Preview — ${today()}</div>${html}</div>`;
+  area.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function previewCoA(){
+  const rows = getRows('coa');
+  const v = id => document.getElementById(id).value;
+  const allPass = rows.every(r=>{ const c=checkPass(r[3],r[4]); return c===null||c===true; });
+
+  const specRows = rows.map(r=>{
+    const c=checkPass(r[3],r[4]);
+    const res = r[4]
+      ? (c===false?`<span class="fail-v">${r[4]} ✗</span>`:c===true?`<span class="pass-v">${r[4]} ✓</span>`:r[4])
+      : '<span style="color:#CBD5E1">—</span>';
+    return `<tr>
+      <td class="param">${r[0]||'—'}</td>
+      <td class="unit">${r[1]||'—'}</td>
+      <td class="method">${r[2]||'—'}</td>
+      <td class="spec-val">${r[3]||'—'}</td>
+      <td class="result-val">${res}</td>
+    </tr>`;
+  }).join('');
+
+  const customer = v('c-cust');
+  const remarks  = v('c-remarks');
+
+  const html=`
+    <div class="doc">
+      ${companyHeader('c', 'Certificate of Analysis', `Code: ${v('c-code')} &nbsp;|&nbsp; ${today()}`)}
+      <div class="doc-title-band">
+        <div>
+          <h2>${v('c-name')}</h2>
+          <p>Batch: ${v('c-batch')} &nbsp;|&nbsp; Origin: South Korea</p>
+        </div>
+        <div>
+          <span class="overall-badge ${allPass?'badge-pass':'badge-fail'}">${allPass?'✓ COMPLIANT':'✗ NON-COMPLIANT'}</span>
+        </div>
+      </div>
+      <div class="doc-body">
+        <div class="coa-meta">
+          <div class="meta-box"><div class="ml">Batch / Lot No.</div><div class="mv">${v('c-batch')||'—'}</div></div>
+          <div class="meta-box"><div class="ml">Production Date</div><div class="mv">${fmtDate(v('c-prod'))}</div></div>
+          <div class="meta-box"><div class="ml">Best Before</div><div class="mv">${fmtDate(v('c-exp'))}</div></div>
+          <div class="meta-box"><div class="ml">Quantity</div><div class="mv">${v('c-qty')||'—'} MT</div></div>
+          <div class="meta-box"><div class="ml">Testing Laboratory</div><div class="mv">${v('c-lab')||'—'}</div></div>
+          <div class="meta-box"><div class="ml">Sample Date</div><div class="mv">${fmtDate(v('c-sdate'))}</div></div>
+          ${customer?`<div class="meta-box" style="grid-column:1/-1"><div class="ml">Customer / Consignee</div><div class="mv">${customer}</div></div>`:''}
+        </div>
+        <div class="doc-sec">Test Results</div>
+        <table class="dtable">
+          <thead><tr><th style="width:25%">Parameter</th><th style="width:10%">Unit</th><th style="width:22%">Method</th><th style="width:20%">Specification</th><th style="width:23%">Result</th></tr></thead>
+          <tbody>${specRows}</tbody>
+        </table>
+        ${remarks?`<div class="doc-sec" style="margin-top:12px">Remarks</div><div class="doc-remarks">${remarks}</div>`:''}
+        <div class="sig-section">
+          <div class="sig-box">
+            <div class="sig-line-draw"></div>
+            <div class="sig-label">Authorised Signatory &nbsp;&nbsp;&nbsp; Date</div>
+          </div>
+          <div class="sig-box">
+            <div class="sig-line-draw"></div>
+            <div class="sig-label">Quality Manager &nbsp;&nbsp;&nbsp; Company Stamp</div>
+          </div>
+        </div>
+      </div>
+      <div class="doc-foot">&copy; ${v('c-co-name')} &nbsp;|&nbsp; Origin: South Korea &nbsp;|&nbsp; This CoA is issued in good faith based on representative sampling and applies to the stated batch only.</div>
+    </div>`;
+
+  const area = document.getElementById('coa-preview-area');
+  area.innerHTML=`<div class="preview-shell"><div class="preview-label">🔬 CoA Preview — ${today()}</div>${html}</div>`;
+  area.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+// Init
+TDS_DEF.forEach(r=>addRow('tds',r));
+COA_DEF.forEach(r=>addRow('coa',r));
+const now=new Date();
+document.getElementById('c-prod').value=now.toISOString().split('T')[0];
+document.getElementById('c-sdate').value=now.toISOString().split('T')[0];
+const exp=new Date(now);exp.setFullYear(exp.getFullYear()+1);
+document.getElementById('c-exp').value=exp.toISOString().split('T')[0];
+</script>
+</body>
+</html>
