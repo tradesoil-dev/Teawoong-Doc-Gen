@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Taewoong Bio — Document Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --teal:#1A6B6B;--teal2:#E8F5F5;--teal3:#B2D8D8;--teal4:#0F4A4A;
+  --dark:#111827;--g1:#6B7280;--g2:#F9FAFB;--g3:#E5E7EB;--g4:#D1D5DB;
+  --white:#fff;--red:#EF4444;--red2:#FEE2E2;--green:#16A34A;--green2:#DCFCE7;
+  --r:10px;--rs:7px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:#EEF0F3;color:var(--dark);font-size:14px;line-height:1.6;min-height:100vh}
+
+/* PASSWORD */
+#pw-overlay{position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#0a2e2e,#1A6B6B 55%,#0d3b3b);display:flex;align-items:center;justify-content:center;padding:16px}
+.pw-box{background:#fff;border-radius:18px;padding:36px 32px;width:100%;max-width:360px;box-shadow:0 32px 80px rgba(0,0,0,0.35);text-align:center}
+.pw-logo{height:52px;object-fit:contain;margin-bottom:18px;display:block;margin-left:auto;margin-right:auto}
+.pw-title{font-size:18px;font-weight:700;color:var(--dark);margin-bottom:4px}
+.pw-sub{font-size:13px;color:var(--g1);margin-bottom:24px}
+.pw-inp{width:100%;padding:11px 14px;border:1.5px solid var(--g3);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--dark);outline:none;text-align:center;margin-bottom:12px;transition:border-color 0.15s}
+.pw-inp:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(26,107,107,0.1)}
+.pw-btn{width:100%;padding:11px;background:var(--teal);color:#fff;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer}
+.pw-btn:hover{background:var(--teal4)}
+.pw-err{font-size:12px;color:var(--red);margin-top:8px;min-height:18px}
+.pw-foot{font-size:11px;color:#9CA3AF;margin-top:18px;line-height:1.6}
+
+/* TOPBAR */
+.topbar{background:linear-gradient(90deg,#0d3d3d,#1A6B6B);color:#fff;padding:0 18px;display:flex;align-items:center;height:56px;position:sticky;top:0;z-index:200;box-shadow:0 2px 12px rgba(13,61,61,0.35)}
+.tb-brand{display:flex;align-items:center;gap:10px}
+.tb-logowrap{background:#fff;border-radius:7px;padding:3px 8px;height:40px;display:flex;align-items:center}
+.tb-logo{height:32px;width:auto;object-fit:contain}
+.tb-name{font-size:14px;font-weight:600;color:#fff}
+.tb-sub{font-size:11px;color:rgba(255,255,255,0.6);margin-left:2px}
+.tb-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.lang-wrap{display:flex;border-radius:6px;overflow:hidden;border:1px solid rgba(255,255,255,0.25)}
+.lang-btn{padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer;background:transparent;color:rgba(255,255,255,0.7);border:none;font-family:'DM Sans',sans-serif;transition:all 0.15s}
+.lang-btn.active{background:#fff;color:var(--teal)}
+.tb-btn{padding:5px 12px;border-radius:6px;border:1px solid rgba(255,255,255,0.25);font-size:12px;font-weight:500;cursor:pointer;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.85);font-family:'DM Sans',sans-serif;transition:all 0.15s}
+.tb-btn:hover{background:rgba(255,255,255,0.15)}
+.tb-btn.danger:hover{background:rgba(220,60,60,0.3);border-color:rgba(255,100,100,0.5)}
+.tb-btn.active-admin{background:rgba(255,200,50,0.2);border-color:rgba(255,200,50,0.5);color:#FFD700}
+
+/* TABS */
+.tabsbar{background:#fff;border-bottom:1px solid var(--g3);padding:0 18px;display:flex;position:sticky;top:56px;z-index:100;box-shadow:0 1px 4px rgba(0,0,0,0.04);overflow-x:auto}
+.tbtn{padding:12px 16px;font-size:13px;font-weight:500;color:var(--g1);cursor:pointer;background:none;border:none;font-family:'DM Sans',sans-serif;border-bottom:2.5px solid transparent;transition:all 0.15s;white-space:nowrap}
+.tbtn:hover{color:var(--teal)}
+.tbtn.active{color:var(--teal);border-bottom-color:var(--teal);font-weight:600}
+
+/* MAIN */
+.main{max-width:820px;margin:0 auto;padding:18px 14px 60px}
+.panel{display:none}.panel.active{display:block}
+
+/* ADMIN */
+.admin-panel{background:#FFFBEB;border:1px solid #FCD34D;border-radius:var(--r);padding:16px;margin-bottom:14px;display:none}
+.admin-panel.show{display:block}
+.admin-title{font-size:12px;font-weight:700;color:#92400E;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px}
+
+/* CARDS */
+.card{background:#fff;border-radius:var(--r);border:1px solid var(--g3);box-shadow:0 1px 3px rgba(0,0,0,0.06);margin-bottom:14px;overflow:hidden}
+.card-hd{padding:10px 16px;border-bottom:1px solid var(--g3);display:flex;align-items:center;gap:8px;background:#FAFAFA}
+.card-hd h3{font-size:11px;font-weight:700;color:var(--dark);text-transform:uppercase;letter-spacing:0.6px}
+.hd-right{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap}
+.card-bd{padding:14px 16px}
+
+/* FORMS */
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.fg3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:11px}
+.full{grid-column:1/-1}
+.fgrp{display:flex;flex-direction:column;gap:4px}
+.fgrp label{font-size:10px;font-weight:700;color:var(--g1);text-transform:uppercase;letter-spacing:0.4px}
+.fgrp input,.fgrp textarea{font-family:'DM Sans',sans-serif;font-size:13px;padding:7px 10px;border-radius:var(--rs);border:1px solid var(--g3);color:var(--dark);background:#fff;width:100%;outline:none;transition:border-color 0.15s}
+.fgrp input:focus,.fgrp textarea:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(26,107,107,0.1)}
+.fgrp textarea{resize:vertical;min-height:62px;line-height:1.5}
+
+/* SPEC TABLE */
+.sw{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.stbl{width:100%;border-collapse:collapse;font-size:13px;min-width:480px}
+.stbl thead tr{background:var(--teal)}
+.stbl th{padding:7px 8px;text-align:left;font-size:10px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:0.4px;white-space:nowrap}
+.stbl tbody tr:nth-child(even){background:#FAFAFA}
+.stbl tbody tr:hover{background:#F0FAFA}
+.stbl td{padding:3px 4px;border-bottom:1px solid #F0F0F0;vertical-align:middle}
+.stbl td input{font-family:'DM Mono',monospace;font-size:12px;padding:4px 7px;border:1px solid var(--g3);border-radius:5px;background:#fff;color:var(--dark);width:100%;outline:none}
+.stbl td input:focus{border-color:var(--teal)}
+.stbl td input.ri{border-color:var(--teal3)}
+.del-btn{background:none;border:none;cursor:pointer;color:var(--g4);padding:3px 6px;border-radius:4px;font-size:13px;transition:all 0.15s}
+.del-btn:hover{color:var(--red);background:var(--red2)}
+.add-row{display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;font-weight:500;color:var(--teal);cursor:pointer;padding:7px;border:1.5px dashed var(--teal3);border-radius:var(--rs);background:none;margin-top:8px;font-family:'DM Sans',sans-serif;width:100%;transition:all 0.15s}
+.add-row:hover{background:var(--teal2);border-color:var(--teal)}
+
+/* BUTTONS */
+.actions{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--rs);font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;border:none;transition:all 0.15s}
+.btn-p{background:var(--teal);color:#fff}.btn-p:hover{background:var(--teal4)}
+.btn-s{background:#fff;color:var(--dark);border:1px solid var(--g3)}.btn-s:hover{background:var(--g2)}
+.btn-sm{padding:5px 10px;font-size:12px}
+.btn-red{background:var(--red);color:#fff}.btn-red:hover{background:#DC2626}
+
+/* MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:5000;display:none;align-items:center;justify-content:center;padding:16px}
+.modal-bg.show{display:flex}
+.modal{background:#fff;border-radius:var(--r);padding:20px;width:100%;max-width:460px;box-shadow:0 20px 60px rgba(0,0,0,0.2);max-height:85vh;display:flex;flex-direction:column}
+.modal h3{font-size:15px;font-weight:700;margin-bottom:4px}
+.modal-sub{font-size:12px;color:var(--g1);margin-bottom:14px}
+.modal-scroll{overflow-y:auto;flex:1}
+.modal-actions{display:flex;gap:8px;margin-top:14px;justify-content:flex-end;flex-shrink:0}
+.load-card{background:var(--teal2);border:1px solid var(--teal3);border-radius:var(--rs);padding:10px 14px;cursor:pointer;margin-bottom:8px;transition:all 0.15s;display:flex;justify-content:space-between;align-items:center}
+.load-card:hover{background:#d4ecec;border-color:var(--teal)}
+.load-card-name{font-size:13px;font-weight:600;color:var(--dark)}
+.load-card-meta{font-size:11px;color:var(--g1);margin-top:2px}
+
+/* DOC NUMBER */
+.doc-num{display:inline-block;background:var(--teal2);color:var(--teal);border:1px solid var(--teal3);border-radius:5px;padding:3px 9px;font-size:11px;font-family:'DM Mono',monospace;font-weight:600;margin-bottom:10px}
+
+/* HISTORY TABLE */
+.htbl{width:100%;border-collapse:collapse;font-size:12px}
+.htbl th{background:#F3F4F6;padding:6px 8px;text-align:left;font-size:10px;font-weight:700;color:var(--g1);text-transform:uppercase;border-bottom:1px solid var(--g3)}
+.htbl td{padding:6px 8px;border-bottom:1px solid #F9F9F9}
+.htbl tr:hover td{background:#F9FFFE}
+
+/* USAGE */
+.ulog{max-height:240px;overflow-y:auto}
+.ulog-item{display:flex;gap:10px;padding:5px 8px;border-bottom:1px solid #F0F0F0}
+.ulog-item:nth-child(odd){background:#FAFAFA}
+.ulog-time{color:var(--g1);white-space:nowrap;font-family:'DM Mono',monospace;font-size:10px;flex-shrink:0}
+.ubadge{display:inline-block;padding:1px 6px;border-radius:10px;font-size:9px;font-weight:700;margin-right:4px}
+.ub-login{background:#DBEAFE;color:#1D4ED8}
+.ub-tds{background:#D1FAE5;color:#065F46}
+.ub-coa{background:#FEF3C7;color:#92400E}
+.ub-sds{background:#EDE9FE;color:#5B21B6}
+.ub-admin{background:#FCE7F3;color:#9D174D}
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.stat-box{background:var(--teal2);border-radius:6px;padding:8px 10px}
+.stat-box .sl{font-size:9px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:2px}
+.stat-box .sv{font-size:18px;font-weight:700;color:var(--dark)}
+
+.empty-state{text-align:center;padding:24px;color:var(--g1);font-size:12px;font-style:italic}
+.lib-card{background:var(--teal2);border:1px solid var(--teal3);border-radius:var(--rs);padding:9px 12px;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;transition:all 0.15s;cursor:pointer}
+.lib-card:hover{background:#d4ecec;border-color:var(--teal)}
+.lib-card-name{font-size:13px;font-weight:600;color:var(--dark)}
+.lib-card-meta{font-size:11px;color:var(--g1);margin-top:1px}
+.obadge{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:20px;font-size:9px;font-weight:700}
+.bp{background:var(--green2);color:var(--green)}.bf{background:var(--red2);color:var(--red)}
+
+/* PREVIEW */
+.preview-shell{background:#D1D5DB;border-radius:var(--r);padding:14px;margin-top:14px;overflow-x:auto}
+.preview-lbl{font-size:10px;font-weight:700;color:#4B5563;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px}
+
+/* DOCUMENT */
+.doc{background:#fff;width:210mm;min-width:210mm;font-family:'DM Sans',sans-serif;color:#111827;display:flex;flex-direction:column}
+.dch{padding:16px 22px 13px;border-bottom:3px solid var(--teal);display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.dch-l{display:flex;align-items:flex-start;gap:11px}
+.dch-logo{height:46px;width:auto;object-fit:contain}
+.dch-name{font-size:13px;font-weight:700;color:var(--dark);margin-bottom:2px}
+.dch-addr{font-size:8px;color:var(--g1);line-height:1.6}
+.dch-r{text-align:right;flex-shrink:0}
+.dch-type{font-size:9px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--teal);margin-bottom:2px}
+.dch-meta{font-size:8.5px;color:var(--g1);line-height:1.7}
+.dtb{background:var(--teal);color:#fff;padding:9px 22px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.dtb h2{font-size:14px;font-weight:700}
+.dtb p{font-size:9.5px;opacity:0.82;margin-top:1px}
+.dbody{padding:13px 22px;flex:1}
+.dbrief{background:var(--teal2);border-left:4px solid var(--teal);padding:7px 12px;font-size:10px;color:var(--dark);font-style:italic;margin-bottom:11px;line-height:1.6}
+.dsec{font-size:9px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:0.6px;margin:10px 0 4px;padding-bottom:2px;border-bottom:1.5px solid var(--teal3)}
+.dtbl{width:100%;border-collapse:collapse;font-size:10px}
+.dtbl th{background:var(--teal);color:#fff;padding:5px 7px;text-align:left;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0.3px}
+.dtbl td{padding:4px 7px;border-bottom:1px solid #F0F0F0;color:var(--dark)}
+.dtbl td.dp{font-weight:500}
+.dtbl td.du,.dtbl td.dm{color:var(--g1);font-size:9px}
+.dtbl td.du{font-family:'DM Mono',monospace}
+.dtbl td.dt{color:var(--g1);font-family:'DM Mono',monospace;font-size:9px;font-style:italic}
+.dtbl td.ds{font-weight:600;color:var(--teal);font-family:'DM Mono',monospace;font-size:9px}
+.dtbl td.dr{font-weight:600;font-family:'DM Mono',monospace;font-size:9px}
+.dtbl tbody tr:nth-child(even) td{background:#F9FFFE}
+.pv{color:var(--green)}.fv{color:var(--red)}
+.igrid{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--g3);border-radius:5px;overflow:hidden;margin-top:3px}
+.iblock{display:flex;border-bottom:1px solid var(--g3)}
+.iblock:nth-child(odd){border-right:1px solid var(--g3)}
+.iblock:nth-last-child(-n+2){border-bottom:none}
+.ilbl{background:var(--teal);color:#fff;font-size:7.5px;font-weight:700;letter-spacing:0.4px;text-transform:uppercase;padding:6px 7px;width:85px;min-width:85px;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.3;flex-shrink:0}
+.icnt{background:var(--teal2);padding:6px 9px;font-size:9px;color:var(--dark);flex:1;line-height:1.7}
+.cmeta{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-bottom:11px}
+.mbox{background:var(--teal2);border-radius:4px;padding:5px 8px}
+.mbox .ml{font-size:7.5px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:1px}
+.mbox .mv{font-size:10.5px;font-weight:600;color:var(--dark);font-family:'DM Mono',monospace}
+.sig-sec{margin-top:22px;padding-top:13px;border-top:1px solid var(--g3);display:grid;grid-template-columns:1fr 1fr;gap:32px}
+.sig-draw{height:38px;border-bottom:1px solid #9CA3AF;margin-bottom:4px}
+.sig-lbl{font-size:8.5px;color:var(--g1);font-weight:600;text-transform:uppercase;letter-spacing:0.4px}
+.dremarks{font-size:9.5px;color:#374151;line-height:1.6;padding:6px 10px;background:#F9FAFB;border-radius:4px;border:1px solid var(--g3)}
+.dwm{font-size:7.5px;color:var(--teal3);text-align:center;padding:3px;background:#F0FAFA}
+.dfoot{background:#F9FAFB;padding:5px 22px;font-size:8px;color:var(--g1);font-style:italic;border-top:1px solid var(--g3)}
+
+@media(max-width:600px){
+  .topbar{padding:0 12px;height:50px}.tb-name{font-size:12px}.tb-sub{display:none}
+  .tabsbar{padding:0 8px}.tbtn{padding:10px 12px;font-size:12px}
+  .main{padding:12px 8px 60px}
+  .fg,.fg3{grid-template-columns:1fr}.full{grid-column:1/-1}
+  .actions{flex-direction:column}.btn{width:100%;justify-content:center}
+  .doc{min-width:unset;width:100%}
+  .dch{flex-direction:column;gap:8px}.dch-r{text-align:left}
+  .dtb{flex-direction:column;align-items:flex-start;gap:5px}
+  .igrid,.cmeta{grid-template-columns:1fr}
+  .iblock:nth-child(odd){border-right:none}
+  .iblock:last-child{border-bottom:none}
+  .sig-sec{grid-template-columns:1fr;gap:16px}
+}
+@media print{
+  body,html{background:#fff!important;margin:0!important;padding:0!important}
+  #pw-overlay,.topbar,.tabsbar,.card,.actions,.preview-lbl,.add-row,.del-btn,.btn,.modal-bg,.admin-panel{display:none!important}
+  .preview-shell{padding:0!important;background:none!important;margin:0!important;border-radius:0!important}
+  .doc{box-shadow:none!important;width:100%!important;min-width:unset!important}
+  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+}
+@page{size:A4;margin:8mm}
+</style>
+</head>
+<body>
+
+<!-- PASSWORD OVERLAY -->
+<div id="pw-overlay">
+  <div class="pw-box">
+    <img class="pw-logo" id="pw-logo" src="data:image/jpeg;base64,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" alt="Taewoong Bio">
+    <div class="pw-title">Document Generator</div>
+    <div class="pw-sub">Enter your access password to continue</div>
+    <input class="pw-inp" type="password" id="pw-inp" placeholder="Password" onkeydown="if(event.key==='Enter')checkPw()">
+    <button class="pw-btn" onclick="checkPw()">Access →</button>
+    <div class="pw-err" id="pw-err"></div>
+    <div class="pw-foot">Taewoong Bio Co., Ltd.<br>Powered by Tradesoil International</div>
+  </div>
+</div>
+
+<!-- LOAD TEMPLATE MODAL -->
+<div class="modal-bg" id="load-modal">
+  <div class="modal">
+    <h3 id="load-modal-title">Load Template</h3>
+    <div class="modal-sub" id="load-modal-sub">Click a template to load it into the form</div>
+    <div class="modal-scroll" id="load-modal-cards"></div>
+    <div class="modal-actions">
+      <button class="btn btn-s btn-sm" onclick="closeModal('load-modal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- SAVE TEMPLATE MODAL -->
+<div class="modal-bg" id="save-modal">
+  <div class="modal">
+    <h3 id="save-modal-title">Save Template</h3>
+    <div class="modal-sub">Give this template a name to save it</div>
+    <div class="fgrp"><label>Template Name</label><input id="save-name-inp" placeholder="e.g. Mixed Fatty Acid (MFA)"></div>
+    <div class="modal-actions">
+      <button class="btn btn-s btn-sm" onclick="closeModal('save-modal')">Cancel</button>
+      <button class="btn btn-p btn-sm" onclick="confirmSave()">💾 Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="tb-brand">
+    <div class="tb-logowrap"><img class="tb-logo" id="tb-logo" src="data:image/jpeg;base64,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" alt="TB"></div>
+    <div>
+      <div class="tb-name">Taewoong Bio Co., Ltd.</div>
+      <span class="tb-sub">Document Generator</span>
+    </div>
+  </div>
+  <div class="tb-right">
+    <div class="lang-wrap">
+      <button class="lang-btn active" id="btn-en" onclick="setLang('en')">EN</button>
+      <button class="lang-btn" id="btn-ko" onclick="setLang('ko')">한국어</button>
+    </div>
+    <button class="tb-btn" id="admin-btn" onclick="toggleAdmin()">⚙ Admin</button>
+    <button class="tb-btn danger" onclick="logOut()">⏻ Log out</button>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabsbar">
+  <button class="tbtn active" onclick="switchTab('tds')">📄 TDS Builder</button>
+  <button class="tbtn" onclick="switchTab('coa')">🔬 CoA Builder</button>
+  <button class="tbtn" onclick="switchTab('sds')">🛡 SDS Builder</button>
+  <button class="tbtn" onclick="switchTab('history')">📋 History</button>
+  <button class="tbtn" onclick="switchTab('usage')">📊 Usage</button>
+</div>
+
+<div class="main">
+
+<!-- ADMIN PANEL -->
+<div class="admin-panel" id="admin-panel">
+  <div class="admin-title">⚙ Admin Panel — Tradesoil International</div>
+  <div class="fg">
+    <div class="fgrp"><label>New User Password</label><input type="password" id="adm-pw1" placeholder="New password"></div>
+    <div class="fgrp"><label>Confirm Password</label><input type="password" id="adm-pw2" placeholder="Confirm"></div>
+    <div class="fgrp full"><label>Company Address</label><input id="adm-addr" placeholder="Address"></div>
+    <div class="fgrp"><label>Tel</label><input id="adm-tel" placeholder="Tel"></div>
+    <div class="fgrp"><label>Email</label><input id="adm-email" placeholder="Email"></div>
+    <div class="fgrp"><label>Website</label><input id="adm-web" placeholder="Website"></div>
+  </div>
+  <div class="actions" style="margin-top:10px">
+    <button class="btn btn-p btn-sm" onclick="saveAdmin()">💾 Save Settings</button>
+    <button class="btn btn-red btn-sm" onclick="clearAll()">🗑 Clear All Data</button>
+  </div>
+  <div id="adm-msg" style="font-size:12px;margin-top:8px"></div>
+</div>
+
+<!-- TDS PANEL -->
+<div id="panel-tds" class="panel active">
+  <div class="card">
+    <div class="card-hd"><h3>Company Information</h3></div>
+    <div class="card-bd">
+      <div class="fg">
+        <div class="fgrp"><label>Company Name</label><input id="t-cn" value="Taewoong Bio Co., Ltd."></div>
+        <div class="fgrp"><label>Tel</label><input id="t-tel" placeholder="+82-..."></div>
+        <div class="fgrp full"><label>Address</label><input id="t-addr" value="1-802, 69-46 Baekhaksandan-gil, Baekhak-myeon, Yeoncheon-gun, Gyeonggi-do, Republic of Korea"></div>
+        <div class="fgrp"><label>Email</label><input id="t-email" placeholder="info@..."></div>
+        <div class="fgrp"><label>Website</label><input id="t-web" placeholder="www...."></div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-hd">
+      <h3>Product Information</h3>
+      <div class="hd-right">
+        <button class="btn btn-s btn-sm" onclick="openSave('tds')">💾 Save Template</button>
+        <button class="btn btn-s btn-sm" onclick="openLoad('tds')">📂 Load Template</button>
+      </div>
+    </div>
+    <div class="card-bd">
+      <div class="doc-num" id="t-docnum">TDS-001</div>
+      <div class="fg">
+        <div class="fgrp"><label>Product Name</label><input id="t-name" value="Mixed Fatty Acid (MFA)"></div>
+        <div class="fgrp"><label>Product Code</label><input id="t-code" value="TW-MFA-01"></div>
+        <div class="fgrp"><label>Grade / Type</label><input id="t-grade" value="Industrial / Biofuel Grade"></div>
+        <div class="fgrp"><label>Version</label><input id="t-ver" value="v1.0"></div>
+        <div class="fgrp full"><label>Product Brief</label><textarea id="t-brief">Mixed Fatty Acid (MFA) is a bio-based fatty acid blend derived from vegetable oil processing streams, suitable as a renewable feedstock for HVO, FAME biodiesel, SAF co-processing, and oleochemical manufacturing. Offered as a direct, sustainable replacement for Palm Fatty Acid Distillate (PFAD).</textarea></div>
+        <div class="fgrp full"><label>Applications</label><input id="t-apps" value="HVO feedstock, FAME biodiesel, SAF co-processing, oleochemicals, soap & surfactants"></div>
+        <div class="fgrp"><label>Origin</label><input id="t-origin" value="South Korea"></div>
+        <div class="fgrp"><label>Certification</label><input id="t-cert" value="ISCC EU / ISCC PLUS available on request"></div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-hd"><h3>Specification Parameters</h3></div>
+    <div class="card-bd">
+      <div class="sw">
+        <table class="stbl">
+          <thead><tr><th style="width:26%">Parameter</th><th style="width:10%">Unit</th><th style="width:28%">Test Method</th><th style="width:13%">Typical</th><th style="width:15%">Specification</th><th style="width:8%"></th></tr></thead>
+          <tbody id="tds-body"></tbody>
+        </table>
+      </div>
+      <button class="add-row" onclick="addRow('tds')">＋ Add parameter</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-hd"><h3>Storage, Packaging & Logistics</h3></div>
+    <div class="card-bd">
+      <div class="fg3">
+        <div class="fgrp"><label>Storage</label><input id="t-storage" value="Carbon steel / SS tank; N₂ blanket; max 80°C"></div>
+        <div class="fgrp"><label>Shelf Life</label><input id="t-shelf" value="12 months"></div>
+        <div class="fgrp"><label>Packaging</label><input id="t-pkg" value="Flexitank 24 MT, ISO tank, bulk tanker"></div>
+      </div>
+    </div>
+  </div>
+  <div class="actions">
+    <button class="btn btn-p" onclick="previewTDS()">👁 Preview TDS</button>
+    <button class="btn btn-s" onclick="window.print()">🖨 Print / Save PDF</button>
+    <button class="btn btn-s" onclick="clr('tds-preview')">✕ Clear</button>
+  </div>
+  <div id="tds-preview"></div>
+</div>
+
+<!-- COA PANEL -->
+<div id="panel-coa" class="panel">
+  <div class="card">
+    <div class="card-hd"><h3>Company Information</h3></div>
+    <div class="card-bd">
+      <div class="fg">
+        <div class="fgrp"><label>Company Name</label><input id="c-cn" value="Taewoong Bio Co., Ltd."></div>
+        <div class="fgrp"><label>Tel</label><input id="c-tel" placeholder="+82-..."></div>
+        <div class="fgrp full"><label>Address</label><input id="c-addr" value="1-802, 69-46 Baekhaksandan-gil, Baekhak-myeon, Yeoncheon-gun, Gyeonggi-do, Republic of Korea"></div>
+        <div class="fgrp"><label>Email</label><input id="c-email" placeholder="info@..."></div>
+        <div class="fgrp"><label>Website</label><input id="c-web" placeholder="www...."></div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-hd">
+      <h3>Product & Batch Details</h3>
+      <div class="hd-right">
+        <button class="btn btn-s btn-sm" onclick="openSave('coa')">💾 Save Template</button>
+        <button class="btn btn-s btn-sm" onclick="openLoad('coa')">📂 Load Template</button>
+      </div>
+    </div>
+    <div class="card-bd">
+      <div class="doc-num" id="c-docnum">COA-2026-001</div>
+      <div class="fg3">
+        <div class="fgrp"><label>Product Name</label><input id="c-name" value="Mixed Fatty Acid (MFA)"></div>
+        <div class="fgrp"><label>Product Code</label><input id="c-code" value="TW-MFA-01"></div>
+        <div class="fgrp"><label>Batch / Lot No.</label><input id="c-batch" value="TW-2026-001"></div>
+        <div class="fgrp"><label>Production Date</label><input id="c-prod" type="date"></div>
+        <div class="fgrp"><label>Best Before</label><input id="c-exp" type="date"></div>
+        <div class="fgrp"><label>Quantity (MT)</label><input id="c-qty" value="24.0"></div>
+        <div class="fgrp"><label>Testing Laboratory</label><input id="c-lab" value="SGS Korea Ltd."></div>
+        <div class="fgrp"><label>Sample Date</label><input id="c-sdate" type="date"></div>
+        <div class="fgrp"><label>Customer / Consignee</label><input id="c-cust" placeholder="Customer name"></div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-hd"><h3>Test Results</h3></div>
+    <div class="card-bd">
+      <div class="sw">
+        <table class="stbl">
+          <thead><tr><th style="width:24%">Parameter</th><th style="width:10%">Unit</th><th style="width:22%">Method</th><th style="width:18%">Specification</th><th style="width:18%">Result</th><th style="width:8%"></th></tr></thead>
+          <tbody id="coa-body"></tbody>
+        </table>
+      </div>
+      <button class="add-row" onclick="addRow('coa')">＋ Add parameter</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-hd"><h3>Remarks</h3></div>
+    <div class="card-bd"><div class="fgrp"><textarea id="c-remarks" style="min-height:50px">All test results comply with the agreed specification. Retained sample held for 12 months from date of analysis.</textarea></div></div>
+  </div>
+  <div class="actions">
+    <button class="btn btn-p" onclick="previewCoA()">👁 Preview CoA</button>
+    <button class="btn btn-s" onclick="window.print()">🖨 Print / Save PDF</button>
+    <button class="btn btn-s" onclick="clr('coa-preview')">✕ Clear</button>
+  </div>
+  <div id="coa-preview"></div>
+</div>
+
+<!-- SDS PANEL -->
+<div id="panel-sds" class="panel">
+  <div class="card">
+    <div class="card-hd"><h3>Company Information</h3></div>
+    <div class="card-bd">
+      <div class="fg">
+        <div class="fgrp"><label>Company Name</label><input id="s-cn" value="Taewoong Bio Co., Ltd."></div>
+        <div class="fgrp"><label>Emergency Tel</label><input id="s-emtel" placeholder="+82-..."></div>
+        <div class="fgrp full"><label>Address</label><input id="s-addr" value="1-802, 69-46 Baekhaksandan-gil, Baekhak-myeon, Yeoncheon-gun, Gyeonggi-do, Republic of Korea"></div>
+        <div class="fgrp"><label>Email</label><input id="s-email" placeholder="info@..."></div>
+        <div class="fgrp"><label>Tel</label><input id="s-tel" placeholder="+82-..."></div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-hd"><h3>Product Identification</h3></div>
+    <div class="card-bd">
+      <div class="fg">
+        <div class="fgrp"><label>Product Name</label><input id="s-name" value="Mixed Fatty Acid (MFA)"></div>
+        <div class="fgrp"><label>Product Code</label><input id="s-code" value="TW-MFA-01"></div>
+        <div class="fgrp"><label>CAS Number</label><input id="s-cas" placeholder="e.g. 67701-06-8"></div>
+        <div class="fgrp"><label>UN Number</label><input id="s-un" value="Not regulated"></div>
+        <div class="fgrp full"><label>Intended Use</label><input id="s-use" value="Renewable fuel feedstock, oleochemical manufacturing"></div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-hd"><h3>Hazard & Composition</h3></div>
+    <div class="card-bd">
+      <div class="fg">
+        <div class="fgrp"><label>GHS Classification</label><input id="s-ghs" value="Not classified as hazardous under GHS"></div>
+        <div class="fgrp"><label>Signal Word</label><input id="s-signal" value="None"></div>
+        <div class="fgrp full"><label>Hazard Statements</label><input id="s-hazard" value="No hazard statements applicable under normal handling conditions"></div>
+        <div class="fgrp full"><label>Main Components</label><input id="s-comp" value="C16–C18 fatty acids (palmitic, stearic, oleic, linoleic)"></div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-hd"><h3>First Aid & Fire Fighting</h3></div>
+    <div class="card-bd">
+      <div class="fg">
+        <div class="fgrp"><label>Inhalation</label><input id="s-inhale" value="Remove to fresh air. Seek medical attention if symptoms persist."></div>
+        <div class="fgrp"><label>Skin Contact</label><input id="s-skin" value="Wash with soap and water. Remove contaminated clothing."></div>
+        <div class="fgrp"><label>Eye Contact</label><input id="s-eye" value="Flush with water for 15 minutes. Seek medical attention if irritation persists."></div>
+        <div class="fgrp"><label>Ingestion</label><input id="s-ingest" value="Do not induce vomiting. Seek medical attention immediately."></div>
+        <div class="fgrp"><label>Extinguishing Media</label><input id="s-fire" value="CO₂, dry chemical powder, foam. Do not use water jet."></div>
+        <div class="fgrp"><label>Flash Point</label><input id="s-flash" value="> 200°C (Pensky-Martens)"></div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-hd"><h3>Handling, Storage & Disposal</h3></div>
+    <div class="card-bd">
+      <div class="fg">
+        <div class="fgrp"><label>Handling Precautions</label><input id="s-handle" value="Avoid contact with skin and eyes. Use in well-ventilated area. Wear appropriate PPE."></div>
+        <div class="fgrp"><label>Storage Conditions</label><input id="s-store" value="Store in sealed containers. Keep away from heat and oxidising agents. Max 80°C."></div>
+        <div class="fgrp"><label>PPE Required</label><input id="s-ppe" value="Safety glasses, chemical resistant gloves, lab coat"></div>
+        <div class="fgrp"><label>Disposal Method</label><input id="s-dispose" value="Dispose in accordance with local regulations. Do not discharge to drains."></div>
+      </div>
+    </div>
+  </div>
+  <div class="actions">
+    <button class="btn btn-p" onclick="previewSDS()">👁 Preview SDS</button>
+    <button class="btn btn-s" onclick="window.print()">🖨 Print / Save PDF</button>
+    <button class="btn btn-s" onclick="clr('sds-preview')">✕ Clear</button>
+  </div>
+  <div id="sds-preview"></div>
+</div>
+
+<!-- HISTORY PANEL -->
+<div id="panel-history" class="panel">
+  <div class="card">
+    <div class="card-hd"><h3>Saved Product Templates</h3></div>
+    <div class="card-bd"><div id="lib-list"></div></div>
+  </div>
+  <div class="card">
+    <div class="card-hd">
+      <h3>Issued CoA History</h3>
+      <div class="hd-right"><button class="btn btn-red btn-sm" onclick="clearHistory()">🗑 Clear</button></div>
+    </div>
+    <div class="card-bd"><div id="hist-list"></div></div>
+  </div>
+</div>
+
+<!-- USAGE PANEL -->
+<div id="panel-usage" class="panel">
+  <div class="card">
+    <div class="card-hd"><h3>Usage Statistics</h3></div>
+    <div class="card-bd">
+      <div class="stat-grid" id="stat-grid"></div>
+      <div class="dsec" style="font-size:10px;margin-bottom:8px">Activity Log</div>
+      <div class="ulog" id="ulog"></div>
+    </div>
+    <div style="padding:0 16px 12px">
+      <button class="btn btn-red btn-sm" onclick="clearUsage()">🗑 Clear Log</button>
+    </div>
+  </div>
+</div>
+
+</div><!-- /main -->
+
+<script>
+// ── CONSTANTS ─────────────────────────────────────────────────────────
+const LOGO = 'data:image/jpeg;base64,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';
+const ADDR = '1-802, 69-46 Baekhaksandan-gil, Baekhak-myeon, Yeoncheon-gun, Gyeonggi-do, Republic of Korea';
+
+const TDS_ROWS = [
+  ["Total Acid Number","mg KOH/g","ASTM D664","","Report"],
+  ["Moisture","wt%","Karl Fischer (coulometric)","","Max. 2.0"],
+  ["Free Fatty Acids","wt%","AOCS Ca 5a-40","","0 – 100"],
+  ["Unsaponifiable Matter","wt%","AOCS Ca 6a-40 / Ca 6b-53","","Max. 5.0"],
+  ["Iodine Value","–","AOCS Cd 1d-92","","Report"],
+  ["Saponification Value","mg KOH/g","AOCS Cd 3-25","","Report"],
+  ["Oxidation Stability","hours","EN 14112 (Rancimat)","","Report"],
+  ["Phosphorus","wppm","ASTM D4951","","Max. 50"],
+  ["Sulfur","wppm","ASTM D5453","","Max. 50"],
+  ["Metals (ICP)","wppm","ISO 21033","","Report"],
+  ["Nitrogen","wppm","ASTM D4629","","Report"],
+  ["Chlorides","wppm","ASTM D7359","","Max. 10"],
+  ["Insoluble Impurities","wt%","AOCS Ca 3a-46","","Max. 0.2"],
+  ["Mono/Di/Triglycerides","wt%","ASTM D6584","","0 – 100"],
+  ["Free/Total Glycerin","wt%","ASTM D6584","","Report"],
+];
+
+const COA_ROWS = [
+  ["Total Acid Number","mg KOH/g","ASTM D664","Report",""],
+  ["Moisture","wt%","Karl Fischer","Max. 2.0",""],
+  ["Free Fatty Acids","wt%","AOCS Ca 5a-40","0 – 100",""],
+  ["Unsaponifiable Matter","wt%","AOCS Ca 6a-40/6b-53","Max. 5.0",""],
+  ["Iodine Value","–","AOCS Cd 1d-92","Report",""],
+  ["Saponification Value","mg KOH/g","AOCS Cd 3-25","Report",""],
+  ["Phosphorus","wppm","ASTM D4951","Max. 50",""],
+  ["Sulfur","wppm","ASTM D5453","Max. 50",""],
+  ["Metals (ICP)","wppm","ISO 21033","Report",""],
+  ["Chlorides","wppm","ASTM D7359","Max. 10",""],
+  ["Insoluble Impurities","wt%","AOCS Ca 3a-46","Max. 0.2",""],
+];
+
+const TDS_ROWS_KO = [
+  ["총산가","mg KOH/g","ASTM D664","","보고"],
+  ["수분","wt%","Karl Fischer (전량법)","","최대 2.0"],
+  ["유리지방산","wt%","AOCS Ca 5a-40","","0 – 100"],
+  ["불비누화물","wt%","AOCS Ca 6a-40 / Ca 6b-53","","최대 5.0"],
+  ["요오드가","–","AOCS Cd 1d-92","","보고"],
+  ["비누화가","mg KOH/g","AOCS Cd 3-25","","보고"],
+  ["산화 안정성","시간","EN 14112 (Rancimat)","","보고"],
+  ["인","wppm","ASTM D4951","","최대 50"],
+  ["황","wppm","ASTM D5453","","최대 50"],
+  ["금속류 (ICP)","wppm","ISO 21033","","보고"],
+  ["질소","wppm","ASTM D4629","","보고"],
+  ["염화물","wppm","ASTM D7359","","최대 10"],
+  ["불용성 불순물","wt%","AOCS Ca 3a-46","","최대 0.2"],
+  ["모노/디/트리글리세리드","wt%","ASTM D6584","","0 – 100"],
+  ["유리/총 글리세린","wt%","ASTM D6584","","보고"],
+];
+
+const COA_ROWS_KO = [
+  ["총산가","mg KOH/g","ASTM D664","보고",""],
+  ["수분","wt%","Karl Fischer","최대 2.0",""],
+  ["유리지방산","wt%","AOCS Ca 5a-40","0 – 100",""],
+  ["불비누화물","wt%","AOCS Ca 6a-40/6b-53","최대 5.0",""],
+  ["요오드가","–","AOCS Cd 1d-92","보고",""],
+  ["비누화가","mg KOH/g","AOCS Cd 3-25","보고",""],
+  ["인","wppm","ASTM D4951","최대 50",""],
+  ["황","wppm","ASTM D5453","최대 50",""],
+  ["금속류 (ICP)","wppm","ISO 21033","보고",""],
+  ["염화물","wppm","ASTM D7359","최대 10",""],
+  ["불용성 불순물","wt%","AOCS Ca 3a-46","최대 0.2",""],
+];
+
+// ── STATE ─────────────────────────────────────────────────────────────
+let lang = 'en';
+let adminOpen = false;
+let savingType = '';
+let USER_PW = 'TW@2026';
+let ADMIN_PW = 'TI@admin2026';
+let tdsN = 1, coaN = 1, sdsN = 1;
+
+// ── STORAGE ───────────────────────────────────────────────────────────
+function ls(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch(e){ return null; } }
+function lss(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+
+// ── INIT ──────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', function(){
+  // Load saved settings
+  var s = ls('tb-s') || {};
+  if(s.up) USER_PW = s.up;
+  if(s.ap) ADMIN_PW = s.ap;
+  if(s.addr){ setCompanyField('addr', s.addr); }
+  if(s.tel){ setCompanyField('tel', s.tel); }
+  if(s.email){ setCompanyField('email', s.email); }
+  if(s.web){ setCompanyField('web', s.web); }
+
+  tdsN = ls('tb-tn') || 1;
+  coaN = ls('tb-cn') || 1;
+  sdsN = ls('tb-sn') || 1;
+  updateNums();
+
+  TDS_ROWS.forEach(function(r){ addRow('tds', r); });
+  COA_ROWS.forEach(function(r){ addRow('coa', r); });
+
+  var now = new Date();
+  var y = now.getFullYear(), m = String(now.getMonth()+1).padStart(2,'0'), d = String(now.getDate()).padStart(2,'0');
+  document.getElementById('c-prod').value = y+'-'+m+'-'+d;
+  document.getElementById('c-sdate').value = y+'-'+m+'-'+d;
+  var ey = y+1;
+  document.getElementById('c-exp').value = ey+'-'+m+'-'+d;
+});
+
+function setCompanyField(field, val){
+  ['t-','c-','s-'].forEach(function(p){
+    var el = document.getElementById(p+field);
+    if(el) el.value = val;
+  });
+  var aEl = document.getElementById('adm-'+field);
+  if(aEl) aEl.value = val;
+}
+
+function updateNums(){
+  document.getElementById('t-docnum').textContent = 'TDS-'+String(tdsN).padStart(3,'0');
+  document.getElementById('c-docnum').textContent = 'COA-'+new Date().getFullYear()+'-'+String(coaN).padStart(3,'0');
+}
+
+// ── AUTH ──────────────────────────────────────────────────────────────
+function checkPw(){
+  var inp = document.getElementById('pw-inp').value;
+  var err = document.getElementById('pw-err');
+  if(inp === USER_PW){
+    document.getElementById('pw-overlay').style.display = 'none';
+    err.textContent = '';
+    logU('login','Login successful');
+  } else {
+    err.textContent = 'Incorrect password. Please try again.';
+    document.getElementById('pw-inp').value = '';
+    document.getElementById('pw-inp').focus();
+  }
+}
+
+function logOut(){
+  document.getElementById('pw-inp').value = '';
+  document.getElementById('pw-err').textContent = '';
+  document.getElementById('pw-overlay').style.display = 'flex';
+  adminOpen = false;
+  document.getElementById('admin-panel').classList.remove('show');
+  document.getElementById('admin-btn').classList.remove('active-admin');
+}
+
+// ── ADMIN ─────────────────────────────────────────────────────────────
+function toggleAdmin(){
+  if(adminOpen){
+    adminOpen = false;
+    document.getElementById('admin-panel').classList.remove('show');
+    document.getElementById('admin-btn').classList.remove('active-admin');
+    return;
+  }
+  var pw = prompt('Enter admin password:');
+  if(pw === ADMIN_PW){
+    adminOpen = true;
+    document.getElementById('admin-panel').classList.add('show');
+    document.getElementById('admin-btn').classList.add('active-admin');
+    var s = ls('tb-s') || {};
+    if(s.addr) document.getElementById('adm-addr').value = s.addr;
+    if(s.tel) document.getElementById('adm-tel').value = s.tel;
+    if(s.email) document.getElementById('adm-email').value = s.email;
+    if(s.web) document.getElementById('adm-web').value = s.web;
+    logU('admin','Admin panel accessed');
+  } else {
+    alert('Incorrect admin password.');
+  }
+}
+
+function saveAdmin(){
+  var p1 = document.getElementById('adm-pw1').value;
+  var p2 = document.getElementById('adm-pw2').value;
+  var msg = document.getElementById('adm-msg');
+  if(p1 && p1 !== p2){ msg.style.color='var(--red)'; msg.textContent='Passwords do not match.'; return; }
+  if(p1) USER_PW = p1;
+  var s = { up:USER_PW, ap:ADMIN_PW,
+    addr: document.getElementById('adm-addr').value,
+    tel: document.getElementById('adm-tel').value,
+    email: document.getElementById('adm-email').value,
+    web: document.getElementById('adm-web').value
+  };
+  lss('tb-s', s);
+  setCompanyField('addr', s.addr);
+  setCompanyField('tel', s.tel);
+  setCompanyField('email', s.email);
+  setCompanyField('web', s.web);
+  msg.style.color='var(--green)'; msg.textContent='Saved successfully. ✓';
+  document.getElementById('adm-pw1').value='';
+  document.getElementById('adm-pw2').value='';
+  logU('admin','Settings saved');
+  setTimeout(function(){ msg.textContent=''; }, 3000);
+}
+
+function clearAll(){
+  if(!confirm('Clear ALL saved data? Cannot be undone.')) return;
+  ['tb-s','tb-tmpl','tb-hist','tb-usage','tb-tn','tb-cn','tb-sn'].forEach(function(k){ localStorage.removeItem(k); });
+  tdsN=1; coaN=1; sdsN=1; updateNums();
+  document.getElementById('adm-msg').textContent = 'All data cleared.';
+}
+
+// ── USAGE LOG ─────────────────────────────────────────────────────────
+function logU(type, msg){
+  var log = ls('tb-usage') || [];
+  var now = new Date();
+  log.unshift({ type:type, msg:msg, time:now.toLocaleString('en-GB') });
+  if(log.length > 100) log.pop();
+  lss('tb-usage', log);
+}
+
+function renderUsage(){
+  var log = ls('tb-usage') || [];
+  var stats = {login:0,tds:0,coa:0,sds:0};
+  log.forEach(function(l){ if(stats[l.type]!==undefined) stats[l.type]++; });
+  document.getElementById('stat-grid').innerHTML =
+    '<div class="stat-box"><div class="sl">Logins</div><div class="sv">'+stats.login+'</div></div>'+
+    '<div class="stat-box"><div class="sl">TDS Generated</div><div class="sv">'+stats.tds+'</div></div>'+
+    '<div class="stat-box"><div class="sl">CoA Generated</div><div class="sv">'+stats.coa+'</div></div>';
+  var ulog = document.getElementById('ulog');
+  if(!log.length){ ulog.innerHTML='<div class="empty-state">No activity yet.</div>'; return; }
+  var bc = {login:'ub-login',tds:'ub-tds',coa:'ub-coa',sds:'ub-sds',admin:'ub-admin'};
+  ulog.innerHTML = log.map(function(l){
+    return '<div class="ulog-item"><span class="ulog-time">'+l.time+'</span><span><span class="ubadge '+(bc[l.type]||'ub-login')+'">'+l.type.toUpperCase()+'</span>'+l.msg+'</span></div>';
+  }).join('');
+}
+
+function clearUsage(){ localStorage.removeItem('tb-usage'); renderUsage(); }
+
+// ── TEMPLATE LIBRARY ──────────────────────────────────────────────────
+function openSave(type){
+  savingType = type;
+  document.getElementById('save-modal-title').textContent = type==='tds' ? 'Save TDS Template' : 'Save CoA Template';
+  document.getElementById('save-name-inp').value = g(type==='tds'?'t-name':'c-name');
+  document.getElementById('save-modal').classList.add('show');
+}
+
+function confirmSave(){
+  var name = document.getElementById('save-name-inp').value.trim();
+  if(!name){ alert('Please enter a template name.'); return; }
+  var templates = ls('tb-tmpl') || {};
+  var key = savingType+'||'+name;
+  templates[key] = {
+    type: savingType,
+    name: name,
+    data: captureData(savingType),
+    rows: getRows(savingType),
+    saved: new Date().toLocaleString('en-GB')
+  };
+  lss('tb-tmpl', templates);
+  closeModal('save-modal');
+  logU(savingType, 'Template saved: '+name);
+  alert('Template "'+name+'" saved successfully!');
+}
+
+function openLoad(type){
+  var templates = ls('tb-tmpl') || {};
+  var keys = Object.keys(templates).filter(function(k){ return k.startsWith(type+'||'); });
+  var title = document.getElementById('load-modal-title');
+  var sub = document.getElementById('load-modal-sub');
+  var cards = document.getElementById('load-modal-cards');
+  title.textContent = type==='tds' ? 'Load TDS Template' : 'Load CoA Template';
+  sub.textContent = keys.length ? 'Click a template to load it' : 'No saved templates yet. Use 💾 Save Template first.';
+  if(!keys.length){ cards.innerHTML='<div class="empty-state">No templates saved yet.</div>'; }
+  else {
+    cards.innerHTML = keys.map(function(k){
+      var t = templates[k];
+      return '<div class="load-card" onclick="loadTmpl(\''+k+'\')">'
+        +'<div><div class="load-card-name">'+t.name+'</div><div class="load-card-meta">'+t.type.toUpperCase()+' · '+t.saved+'</div></div>'
+        +'<button class="btn btn-red btn-sm" onclick="event.stopPropagation();deleteTmpl(\''+k+'\')">🗑</button>'
+        +'</div>';
+    }).join('');
+  }
+  document.getElementById('load-modal').classList.add('show');
+}
+
+function loadTmpl(key){
+  var templates = ls('tb-tmpl') || {};
+  var t = templates[key];
+  if(!t){ alert('Template not found.'); return; }
+  var data = t.data;
+  Object.keys(data).forEach(function(id){
+    var el = document.getElementById(id);
+    if(el) el.value = data[id];
+  });
+  document.getElementById(t.type+'-body').innerHTML = '';
+  t.rows.forEach(function(r){ addRow(t.type, r); });
+  closeModal('load-modal');
+  logU(t.type, 'Template loaded: '+t.name);
+  alert('Template "'+t.name+'" loaded!');
+}
+
+function deleteTmpl(key){
+  if(!confirm('Delete this template?')) return;
+  var templates = ls('tb-tmpl') || {};
+  delete templates[key];
+  lss('tb-tmpl', templates);
+  renderHistory();
+  // Refresh the open modal if still open
+  var modal = document.getElementById('load-modal');
+  if(modal.classList.contains('show')){
+    var type = key.split('||')[0];
+    openLoad(type);
+  }
+}
+
+function captureData(type){
+  var ids = type==='tds'
+    ? ['t-cn','t-tel','t-addr','t-email','t-web','t-name','t-code','t-grade','t-ver','t-brief','t-apps','t-origin','t-cert','t-storage','t-shelf','t-pkg']
+    : ['c-cn','c-tel','c-addr','c-email','c-web','c-name','c-code','c-batch','c-qty','c-lab','c-remarks'];
+  var data = {};
+  ids.forEach(function(id){ var el=document.getElementById(id); if(el) data[id]=el.value; });
+  return data;
+}
+
+// ── HISTORY ───────────────────────────────────────────────────────────
+function renderHistory(){
+  var templates = ls('tb-tmpl') || {};
+  var keys = Object.keys(templates);
+  var libEl = document.getElementById('lib-list');
+  if(!keys.length){ libEl.innerHTML='<div class="empty-state">No templates saved yet. Use 💾 Save Template in TDS or CoA builder.</div>'; }
+  else {
+    libEl.innerHTML = keys.map(function(k){
+      var t = templates[k];
+      return '<div class="lib-card" onclick="loadTmpl(\''+k+'\')">'
+        +'<div><div class="lib-card-name">'+t.name+'</div><div class="lib-card-meta">'+t.type.toUpperCase()+' · '+t.saved+'</div></div>'
+        +'<button class="btn btn-red btn-sm" onclick="event.stopPropagation();deleteTmpl(\''+k+'\')">🗑</button>'
+        +'</div>';
+    }).join('');
+  }
+  var history = ls('tb-hist') || [];
+  var histEl = document.getElementById('hist-list');
+  if(!history.length){ histEl.innerHTML='<div class="empty-state">No CoAs issued yet. Preview a CoA to save it here automatically.</div>'; return; }
+  histEl.innerHTML = '<div style="overflow-x:auto"><table class="htbl"><thead><tr><th>Doc No.</th><th>Product</th><th>Batch</th><th>Customer</th><th>Date</th><th>Status</th></tr></thead><tbody>'
+    + history.map(function(h){
+      return '<tr><td style="font-family:\'DM Mono\',monospace;font-weight:600">'+h.docnum+'</td><td>'+h.product+'</td><td>'+h.batch+'</td><td>'+(h.customer||'—')+'</td><td>'+h.date+'</td><td><span class="obadge '+(h.pass?'bp':'bf')+'">'+(h.pass?'✓ OK':'✗ FAIL')+'</span></td></tr>';
+    }).join('')
+    + '</tbody></table></div>';
+}
+
+function clearHistory(){ localStorage.removeItem('tb-hist'); renderHistory(); }
+
+// ── LANGUAGE ──────────────────────────────────────────────────────────
+function setLang(l){
+  lang = l;
+  document.getElementById('btn-en').classList.toggle('active', l==='en');
+  document.getElementById('btn-ko').classList.toggle('active', l==='ko');
+  if(l==='ko'){
+    var map = {
+      't-name':'혼합 지방산 (MFA)','t-grade':'산업용 / 바이오연료 등급',
+      't-brief':'혼합 지방산(MFA)은 식물성 오일 정제 공정에서 유래한 바이오 기반 지방산 혼합물입니다.',
+      't-apps':'HVO 원료, FAME 바이오디젤, SAF 공동처리, 올레오케미컬','t-origin':'대한민국',
+      't-cert':'요청 시 ISCC EU / ISCC PLUS 인증 가능',
+      't-storage':'탄소강 / 스테인리스 탱크; 질소 블랭킷; 최대 80°C','t-shelf':'12개월',
+      't-pkg':'플렉시탱크 24MT, ISO 탱크',
+      'c-name':'혼합 지방산 (MFA)','c-lab':'SGS 코리아',
+      'c-remarks':'모든 시험 결과는 합의된 규격에 적합합니다.',
+    };
+    Object.keys(map).forEach(function(id){ var el=document.getElementById(id); if(el) el.value=map[id]; });
+    document.getElementById('tds-body').innerHTML=''; TDS_ROWS_KO.forEach(function(r){ addRow('tds',r); });
+    document.getElementById('coa-body').innerHTML=''; COA_ROWS_KO.forEach(function(r){ addRow('coa',r); });
+  } else {
+    var map = {
+      't-name':'Mixed Fatty Acid (MFA)','t-grade':'Industrial / Biofuel Grade',
+      't-brief':'Mixed Fatty Acid (MFA) is a bio-based fatty acid blend derived from vegetable oil processing streams, suitable as a renewable feedstock for HVO, FAME biodiesel, SAF co-processing, and oleochemical manufacturing. Offered as a direct, sustainable replacement for Palm Fatty Acid Distillate (PFAD).',
+      't-apps':'HVO feedstock, FAME biodiesel, SAF co-processing, oleochemicals, soap & surfactants','t-origin':'South Korea',
+      't-cert':'ISCC EU / ISCC PLUS available on request',
+      't-storage':'Carbon steel / SS tank; N₂ blanket; max 80°C','t-shelf':'12 months',
+      't-pkg':'Flexitank 24 MT, ISO tank, bulk tanker',
+      'c-name':'Mixed Fatty Acid (MFA)','c-lab':'SGS Korea Ltd.',
+      'c-remarks':'All test results comply with the agreed specification. Retained sample held for 12 months from date of analysis.',
+    };
+    Object.keys(map).forEach(function(id){ var el=document.getElementById(id); if(el) el.value=map[id]; });
+    document.getElementById('tds-body').innerHTML=''; TDS_ROWS.forEach(function(r){ addRow('tds',r); });
+    document.getElementById('coa-body').innerHTML=''; COA_ROWS.forEach(function(r){ addRow('coa',r); });
+  }
+}
+
+// ── TAB ───────────────────────────────────────────────────────────────
+function switchTab(t){
+  ['tds','coa','sds','history','usage'].forEach(function(p,i){
+    document.getElementById('panel-'+p).classList.toggle('active', p===t);
+    document.querySelectorAll('.tbtn')[i].classList.toggle('active', p===t);
+  });
+  if(t==='history') renderHistory();
+  if(t==='usage') renderUsage();
+}
+
+// ── ROWS ──────────────────────────────────────────────────────────────
+function addRow(type, d){
+  var tbody = document.getElementById(type+'-body');
+  var tr = document.createElement('tr');
+  var r = d || ['','','','',''];
+  if(type==='tds'){
+    tr.innerHTML = '<td><input value="'+(r[0]||'')+'" placeholder="Parameter"></td>'
+      +'<td><input value="'+(r[1]||'')+'" placeholder="Unit"></td>'
+      +'<td><input value="'+(r[2]||'')+'" placeholder="Method"></td>'
+      +'<td><input value="'+(r[3]||'')+'" placeholder="Typical" style="color:var(--g1)"></td>'
+      +'<td><input value="'+(r[4]||'')+'" placeholder="Spec"></td>'
+      +'<td><button class="del-btn" onclick="this.closest(\'tr\').remove()">✕</button></td>';
+  } else {
+    tr.innerHTML = '<td><input value="'+(r[0]||'')+'" placeholder="Parameter"></td>'
+      +'<td><input value="'+(r[1]||'')+'" placeholder="Unit"></td>'
+      +'<td><input value="'+(r[2]||'')+'" placeholder="Method"></td>'
+      +'<td><input value="'+(r[3]||'')+'" placeholder="Spec"></td>'
+      +'<td><input class="ri" value="'+(r[4]||'')+'" placeholder="Result"></td>'
+      +'<td><button class="del-btn" onclick="this.closest(\'tr\').remove()">✕</button></td>';
+  }
+  tbody.appendChild(tr);
+}
+
+function getRows(type){
+  return Array.from(document.getElementById(type+'-body').querySelectorAll('tr')).map(function(tr){
+    return Array.from(tr.querySelectorAll('input')).map(function(i){ return i.value.trim(); });
+  });
+}
+
+// ── HELPERS ───────────────────────────────────────────────────────────
+function g(id){ var el=document.getElementById(id); return el?el.value:''; }
+function clr(id){ document.getElementById(id).innerHTML=''; }
+function closeModal(id){ document.getElementById(id).classList.remove('show'); }
+
+function fmtDate(v){
+  if(!v) return '—';
+  var d = new Date(v);
+  return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+}
+
+function today(){
+  return new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+}
+
+function chk(spec, result){
+  if(!result || result.toLowerCase()==='report' || result.toLowerCase()==='보고') return null;
+  var r = parseFloat(result); if(isNaN(r)) return null;
+  var mx = spec.match(/max\.?\s*([\d.]+)/i);
+  var mn = spec.match(/min\.?\s*([\d.]+)/i);
+  if(mx && r > parseFloat(mx[1])) return false;
+  if(mn && r < parseFloat(mn[1])) return false;
+  return true;
+}
+
+function companyHdr(p, docType, meta){
+  var cn=g(p+'-cn'), addr=g(p+'-addr'), tel=g(p+'-tel'), email=g(p+'-email'), web=g(p+'-web');
+  var contact = [tel,email,web].filter(Boolean).join(' | ');
+  return '<div class="dch">'
+    +'<div class="dch-l"><img class="dch-logo" src="'+LOGO+'" alt="'+cn+'">'
+    +'<div><div class="dch-name">'+cn+'</div>'
+    +'<div class="dch-addr">'+addr+(contact?'<br>'+contact:'')+'</div></div></div>'
+    +'<div class="dch-r"><div class="dch-type">'+docType+'</div><div class="dch-meta">'+meta+'</div></div>'
+    +'</div>';
+}
+
+// ── PREVIEW TDS ───────────────────────────────────────────────────────
+function previewTDS(){
+  var rows = getRows('tds');
+  var docNum = 'TDS-'+String(tdsN).padStart(3,'0');
+  var ko = lang==='ko';
+  var specRows = rows.map(function(r){
+    return '<tr><td class="dp">'+r[0]+'</td><td class="du">'+r[1]+'</td><td class="dm">'+r[2]+'</td><td class="dt">'+(r[3]||'—')+'</td><td class="ds">'+r[4]+'</td></tr>';
+  }).join('');
+  var html = '<div class="doc">'
+    +companyHdr('t','Product Data Sheet','Doc: '+docNum+' | '+g('t-ver')+' | '+today())
+    +'<div class="dtb"><div><h2>'+g('t-name')+'</h2><p>'+g('t-grade')+' | '+(ko?'원산지':'Origin')+': '+g('t-origin')+'</p></div></div>'
+    +'<div class="dbody">'
+    +'<div class="dbrief">'+g('t-brief')+'</div>'
+    +'<div class="dsec">'+(ko?'품질 규격':'Quality Specifications')+'</div>'
+    +'<table class="dtbl"><thead><tr>'
+    +'<th style="width:28%">'+(ko?'파라미터':'Parameter')+'</th>'
+    +'<th style="width:10%">'+(ko?'단위':'Unit')+'</th>'
+    +'<th style="width:30%">'+(ko?'시험 방법':'Test Method')+'</th>'
+    +'<th style="width:14%">'+(ko?'일반값':'Typical')+'</th>'
+    +'<th style="width:18%">'+(ko?'규격':'Specification')+'</th>'
+    +'</tr></thead><tbody>'+specRows+'</tbody></table>'
+    +'<div class="dsec" style="margin-top:11px">'+(ko?'제품 정보':'Product Information')+'</div>'
+    +'<div class="igrid">'
+    +'<div class="iblock"><div class="ilbl">'+(ko?'용도':'Applications')+'</div><div class="icnt">'+g('t-apps')+'</div></div>'
+    +'<div class="iblock"><div class="ilbl">'+(ko?'인증':'Certification')+'</div><div class="icnt">'+g('t-cert')+'</div></div>'
+    +'<div class="iblock"><div class="ilbl">'+(ko?'보관':'Storage')+'</div><div class="icnt">'+g('t-storage')+'</div></div>'
+    +'<div class="iblock"><div class="ilbl">'+(ko?'유통기한':'Shelf Life')+'</div><div class="icnt">'+g('t-shelf')+'</div></div>'
+    +'<div class="iblock"><div class="ilbl">'+(ko?'포장':'Packaging')+'</div><div class="icnt">'+g('t-pkg')+'</div></div>'
+    +'<div class="iblock"><div class="ilbl">'+(ko?'서류':'Documents')+'</div><div class="icnt">CoA per batch | SDS on request | ISCC declaration on request</div></div>'
+    +'</div></div>'
+    +'<div class="dwm">Powered by Tradesoil International | www.tradesoil.com</div>'
+    +'<div class="dfoot">© '+g('t-cn')+' | '+(ko?'원산지':'Origin')+': '+g('t-origin')+' | Doc: '+docNum+' | '+(ko?'기밀 문서':'Confidential')+'</div>'
+    +'</div>';
+  document.getElementById('tds-preview').innerHTML = '<div class="preview-shell"><div class="preview-lbl">📄 '+(ko?'TDS 미리보기':'TDS Preview')+' — '+docNum+' — '+today()+'</div>'+html+'</div>';
+  document.getElementById('tds-preview').scrollIntoView({behavior:'smooth',block:'start'});
+  tdsN++; lss('tb-tn',tdsN); updateNums();
+  logU('tds','TDS generated: '+g('t-name')+' ('+docNum+')');
+}
+
+// ── PREVIEW CoA ───────────────────────────────────────────────────────
+function previewCoA(){
+  var rows = getRows('coa');
+  var yr = new Date().getFullYear();
+  var docNum = 'COA-'+yr+'-'+String(coaN).padStart(3,'0');
+  var ko = lang==='ko';
+  var allPass = rows.every(function(r){ var c=chk(r[3],r[4]); return c===null||c===true; });
+  var specRows = rows.map(function(r){
+    var c = chk(r[3],r[4]);
+    var res = r[4] ? (c===false?'<span class="fv">'+r[4]+' ✗</span>':c===true?'<span class="pv">'+r[4]+' ✓</span>':r[4]) : '<span style="color:var(--g4)">—</span>';
+    return '<tr><td class="dp">'+r[0]+'</td><td class="du">'+r[1]+'</td><td class="dm">'+r[2]+'</td><td class="ds">'+r[3]+'</td><td class="dr">'+res+'</td></tr>';
+  }).join('');
+  var cust=g('c-cust'), rem=g('c-remarks');
+  var html = '<div class="doc">'
+    +companyHdr('c','Certificate of Analysis','Doc: '+docNum+' | '+today())
+    +'<div class="dtb"><div><h2>'+g('c-name')+'</h2><p>'+(ko?'배치':'Batch')+': '+g('c-batch')+' | '+(ko?'원산지':'Origin')+': South Korea</p></div>'
+    +'<span class="obadge '+(allPass?'bp':'bf')+'">'+(allPass?(ko?'✓ 적합':'✓ COMPLIANT'):(ko?'✗ 부적합':'✗ NON-COMPLIANT'))+'</span></div>'
+    +'<div class="dbody">'
+    +'<div class="cmeta">'
+    +'<div class="mbox"><div class="ml">'+(ko?'배치 번호':'Batch No.')+'</div><div class="mv">'+g('c-batch')+'</div></div>'
+    +'<div class="mbox"><div class="ml">'+(ko?'생산일':'Production Date')+'</div><div class="mv">'+fmtDate(g('c-prod'))+'</div></div>'
+    +'<div class="mbox"><div class="ml">'+(ko?'유효기간':'Best Before')+'</div><div class="mv">'+fmtDate(g('c-exp'))+'</div></div>'
+    +'<div class="mbox"><div class="ml">'+(ko?'수량':'Quantity')+'</div><div class="mv">'+g('c-qty')+' MT</div></div>'
+    +'<div class="mbox"><div class="ml">'+(ko?'시험기관':'Testing Lab')+'</div><div class="mv">'+g('c-lab')+'</div></div>'
+    +'<div class="mbox"><div class="ml">'+(ko?'샘플 채취일':'Sample Date')+'</div><div class="mv">'+fmtDate(g('c-sdate'))+'</div></div>'
+    +(cust?'<div class="mbox" style="grid-column:1/-1"><div class="ml">'+(ko?'고객':'Customer')+'</div><div class="mv">'+cust+'</div></div>':'')
+    +'</div>'
+    +'<div class="dsec">'+(ko?'시험 결과':'Test Results')+'</div>'
+    +'<table class="dtbl"><thead><tr>'
+    +'<th style="width:24%">'+(ko?'파라미터':'Parameter')+'</th>'
+    +'<th style="width:10%">'+(ko?'단위':'Unit')+'</th>'
+    +'<th style="width:22%">'+(ko?'방법':'Method')+'</th>'
+    +'<th style="width:20%">'+(ko?'규격':'Specification')+'</th>'
+    +'<th style="width:24%">'+(ko?'결과':'Result')+'</th>'
+    +'</tr></thead><tbody>'+specRows+'</tbody></table>'
+    +(rem?'<div class="dsec" style="margin-top:9px">'+(ko?'비고':'Remarks')+'</div><div class="dremarks">'+rem+'</div>':'')
+    +'<div class="sig-sec">'
+    +'<div><div class="sig-draw"></div><div class="sig-lbl">'+(ko?'서명인 / 날짜':'Authorised Signatory / Date')+'</div></div>'
+    +'<div><div class="sig-draw"></div><div class="sig-lbl">'+(ko?'품질관리자 / 직인':'Quality Manager / Company Stamp')+'</div></div>'
+    +'</div></div>'
+    +'<div class="dwm">Powered by Tradesoil International | www.tradesoil.com</div>'
+    +'<div class="dfoot">© '+g('c-cn')+' | Doc: '+docNum+' | '+(ko?'본 성적서는 명시된 배치에만 적용됩니다.':'This CoA applies to the stated batch only.')+'</div>'
+    +'</div>';
+  document.getElementById('coa-preview').innerHTML = '<div class="preview-shell"><div class="preview-lbl">🔬 '+(ko?'CoA 미리보기':'CoA Preview')+' — '+docNum+' — '+today()+'</div>'+html+'</div>';
+  document.getElementById('coa-preview').scrollIntoView({behavior:'smooth',block:'start'});
+  var hist = ls('tb-hist') || [];
+  hist.unshift({docnum:docNum,product:g('c-name'),batch:g('c-batch'),customer:cust,date:today(),pass:allPass});
+  if(hist.length>50) hist.pop();
+  lss('tb-hist',hist);
+  coaN++; lss('tb-cn',coaN); updateNums();
+  logU('coa','CoA generated: '+g('c-name')+' batch '+g('c-batch')+' ('+docNum+')');
+}
+
+// ── PREVIEW SDS ───────────────────────────────────────────────────────
+function previewSDS(){
+  var docNum = 'SDS-'+String(sdsN).padStart(3,'0');
+  var ko = lang==='ko';
+  var html = '<div class="doc">'
+    +companyHdr('s','Safety Data Sheet','Doc: '+docNum+' | '+today())
+    +'<div class="dtb"><div><h2>'+g('s-name')+'</h2><p>'+(ko?'제품 코드':'Code')+': '+g('s-code')+' | CAS: '+(g('s-cas')||'N/A')+'</p></div></div>'
+    +'<div class="dbody">'
+    +'<div class="dsec">1. '+(ko?'제품 및 회사 정보':'Product & Company Identification')+'</div>'
+    +'<table class="dtbl"><tbody>'
+    +'<tr><td class="dp" style="width:32%">'+(ko?'제품명':'Product Name')+'</td><td>'+g('s-name')+'</td></tr>'
+    +'<tr><td class="dp">'+(ko?'제품 코드':'Product Code')+'</td><td>'+g('s-code')+'</td></tr>'
+    +'<tr><td class="dp">CAS No.</td><td>'+(g('s-cas')||'Mixture')+'</td></tr>'
+    +'<tr><td class="dp">'+(ko?'용도':'Intended Use')+'</td><td>'+g('s-use')+'</td></tr>'
+    +'<tr><td class="dp">'+(ko?'공급자':'Supplier')+'</td><td>'+g('s-cn')+'</td></tr>'
+    +'<tr><td class="dp">'+(ko?'주소':'Address')+'</td><td>'+g('s-addr')+'</td></tr>'
+    +'<tr><td class="dp">'+(ko?'긴급 연락처':'Emergency Tel')+'</td><td>'+(g('s-emtel')||g('s-tel')||'—')+'</td></tr>'
+    +'</tbody></table>'
+    +'<div class="dsec">2. '+(ko?'위험성 식별':'Hazard Identification')+'</div>'
+    +'<table class="dtbl"><tbody>'
+    +'<tr><td class="dp" style="width:32%">'+(ko?'GHS 분류':'GHS Classification')+'</td><td>'+g('s-ghs')+'</td></tr>'
+    +'<tr><td class="dp">'+(ko?'신호어':'Signal Word')+'</td><td>'+g('s-signal')+'</td></tr>'
+    +'<tr><td class="dp">'+(ko?'위험 문구':'Hazard Statements')+'</td><td>'+g('s-hazard')+'</td></tr>'
+    +'<tr><td class="dp">'+(ko?'주요 성분':'Main Components')+'</td><td>'+g('s-comp')+'</td></tr>'
+    +'<tr><td class="dp">UN No.</td><td>'+g('s-un')+'</td></tr>'
+    +'</tbody></table>'
+    +'<div class="dsec">3. '+(ko?'응급처치':'First Aid Measures')+'</div>'
+    +'<table class="dtbl"><tbody>'
+    +'<tr><td class="dp" style="width:32%">'+(ko?'흡입':'Inhalation')+'</td><td>'+g('s-inhale')+'</td></tr>'
+    +'<tr><td class="dp">'+(ko?'피부 접촉':'Skin Contact')+'</td><td>'+g('s-skin')+'</td></tr>'
+    +'<tr><td class="dp">'+(ko?'눈 접촉':'Eye Contact')+'</td><td>'+g('s-eye')+'</td></tr>'
+    +'<tr><td class="dp">'+(ko?'섭취':'Ingestion')+'</td><td>'+g('s-ingest')+'</td></tr>'
+    +'</tbody></table>'
+    +'<div class="dsec">4. '+(ko?'화재 시 조치':'Fire Fighting')+'</div>'
+    +'<table class="dtbl"><tbody>'
+    +'<tr><td class="dp" style="width:32%">'+(ko?'소화 매체':'Extinguishing Media')+'</td><td>'+g('s-fire')+'</td></tr>'
+    +'<tr><td class="dp">'+(ko?'인화점':'Flash Point')+'</td><td>'+g('s-flash')+'</td></tr>'
+    +'</tbody></table>'
+    +'<div class="dsec">5. '+(ko?'취급 및 보관':'Handling & Storage')+'</div>'
+    +'<table class="dtbl"><tbody>'
+    +'<tr><td class="dp" style="width:32%">'+(ko?'취급 주의사항':'Handling Precautions')+'</td><td>'+g('s-handle')+'</td></tr>'
+    +'<tr><td class="dp">'+(ko?'보관 조건':'Storage Conditions')+'</td><td>'+g('s-store')+'</td></tr>'
+    +'<tr><td class="dp">'+(ko?'필요 PPE':'PPE Required')+'</td><td>'+g('s-ppe')+'</td></tr>'
+    +'<tr><td class="dp">'+(ko?'폐기 방법':'Disposal Method')+'</td><td>'+g('s-dispose')+'</td></tr>'
+    +'</tbody></table>'
+    +'<div class="sig-sec" style="margin-top:18px">'
+    +'<div><div class="sig-draw"></div><div class="sig-lbl">'+(ko?'서명인 / 날짜':'Authorised Signatory / Date')+'</div></div>'
+    +'<div><div class="sig-draw"></div><div class="sig-lbl">'+(ko?'품질관리자 / 직인':'Quality Manager / Stamp')+'</div></div>'
+    +'</div></div>'
+    +'<div class="dwm">Powered by Tradesoil International | www.tradesoil.com</div>'
+    +'<div class="dfoot">© '+g('s-cn')+' | Doc: '+docNum+' | '+(ko?'GHS 기준에 따라 작성':'Prepared in accordance with GHS guidelines.')+'</div>'
+    +'</div>';
+  document.getElementById('sds-preview').innerHTML = '<div class="preview-shell"><div class="preview-lbl">🛡 '+(ko?'SDS 미리보기':'SDS Preview')+' — '+docNum+' — '+today()+'</div>'+html+'</div>';
+  document.getElementById('sds-preview').scrollIntoView({behavior:'smooth',block:'start'});
+  sdsN++; lss('tb-sn',sdsN);
+  logU('sds','SDS generated: '+g('s-name')+' ('+docNum+')');
+}
+</script>
+</body>
+</html>
